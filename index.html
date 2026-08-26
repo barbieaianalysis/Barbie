@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Barbie AI · Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --rose:#b3536a; --rose-dark:#7a2e42; --rose-lt:#fdf1f0;
+  --gold:#c9a66b; --gold-lt:#faf3e6;
+  --cream:#fdf7f3; --white:#ffffff;
+  --gray-lt:#f3ece9; --gray:#ddd0cb; --gray-dk:#8a7b76; --ink:#2b2320;
+  --radius:10px; --radius-lg:20px;
+  --shadow:0 2px 12px rgba(122,46,66,0.10);
+  --shadow-lg:0 24px 80px rgba(122,46,66,0.30);
+}
+html, body { height: 100%; }
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(160deg, var(--rose) 0%, var(--rose-dark) 100%);
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; position: relative; overflow-x: hidden; padding: 16px 0;
+}
+body::after {
+  content: '';
+  position: fixed; width: 620px; height: 620px;
+  background: radial-gradient(circle, rgba(201,166,107,0.15) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  pointer-events: none; z-index: 0;
+}
+.card {
+  background: var(--white); border-radius: var(--radius-lg);
+  padding: 2.2rem 2.2rem 2rem; width: 100%; max-width: 400px;
+  box-shadow: var(--shadow-lg); position: relative; z-index: 1;
+  animation: slideUp 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes slideUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+
+.logo-wrap { display:flex; flex-direction:column; align-items:center; margin-bottom:1.4rem; }
+.logo-badge {
+  width:64px; height:64px; border-radius:18px;
+  background: linear-gradient(135deg, var(--rose) 0%, var(--gold) 100%);
+  display:flex; align-items:center; justify-content:center;
+  font-size:28px; margin-bottom:10px; box-shadow: var(--shadow);
+}
+.logo-wrap h1 {
+  font-family:'Playfair Display', serif; font-size:24px; color:var(--rose-dark);
+  letter-spacing:0.01em;
+}
+.logo-wrap p { font-size:12.5px; color:var(--gray-dk); margin-top:2px; letter-spacing:0.03em; }
+
+.field { margin-bottom: 1.1rem; }
+.field label {
+  display:block; font-size:11px; font-weight:600; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--rose-dark); margin-bottom:7px;
+}
+.phone-input-wrap {
+  display:flex; align-items:stretch; border:1.5px solid var(--gray);
+  border-radius:var(--radius); overflow:hidden; background:var(--gray-lt);
+  transition:border-color .15s, box-shadow .15s;
+}
+.phone-input-wrap:focus-within { border-color:var(--rose); box-shadow:0 0 0 3px rgba(179,83,106,0.14); background:var(--white); }
+.phone-prefix {
+  display:flex; align-items:center; gap:6px; padding:0 12px;
+  background:var(--rose-lt); border-right:1.5px solid var(--gray);
+  font-size:14px; font-weight:600; color:var(--rose-dark); white-space:nowrap; flex-shrink:0;
+}
+#phoneInput { flex:1; border:none; background:transparent; padding:0 12px; height:46px; font-size:16px; color:var(--ink); outline:none; letter-spacing:0.02em; }
+#phoneHint { font-size:11.5px; color:var(--gray-dk); margin-top:6px; }
+
+.pin-dots { display:flex; justify-content:center; gap:14px; margin: 6px 0 4px; }
+.pin-dot { width:14px; height:14px; border-radius:50%; border:2px solid var(--gray); transition: all .15s; }
+.pin-dot.filled { background:var(--rose); border-color:var(--rose); }
+
+.numpad { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin: 14px 0 4px; }
+.np-btn {
+  height:52px; border-radius:12px; border:1.5px solid var(--gray); background:var(--gray-lt);
+  font-size:19px; font-weight:500; color:var(--ink); cursor:pointer; transition: all .1s;
+}
+.np-btn:active { background:var(--rose-lt); border-color:var(--rose); transform:scale(0.96); }
+.np-btn.del { color:var(--rose-dark); font-size:17px; }
+
+.login-btn {
+  width:100%; height:48px; margin-top:1.3rem; border:none; border-radius:var(--radius);
+  background: linear-gradient(135deg, var(--rose) 0%, var(--rose-dark) 100%);
+  color:#fff; font-size:15px; font-weight:600; letter-spacing:0.03em; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:opacity .15s;
+}
+.login-btn:hover { opacity:0.9; }
+.login-btn:disabled { opacity:0.45; cursor:not-allowed; }
+.spinner { width:16px; height:16px; border:2px solid rgba(255,255,255,0.4); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+.err-msg {
+  display:none; margin-top:14px; padding:10px 14px; border-radius:var(--radius);
+  background:#fef2f2; color:#991b1b; border:1px solid #fecaca; font-size:13px;
+}
+.shake { animation: shakeAnim .35s; }
+@keyframes shakeAnim { 10%,90%{transform:translateX(-2px)} 20%,80%{transform:translateX(4px)} 30%,50%,70%{transform:translateX(-8px)} 40%,60%{transform:translateX(8px)} }
+
+.footer-note { text-align:center; font-size:11.5px; color:var(--gray-dk); margin-top:1.4rem; }
+.footer-note a { color:var(--rose-dark); text-decoration:none; font-weight:600; }
+</style>
+</head>
+<body>
+
+<div class="card" id="loginCard">
+  <div class="logo-wrap">
+    <div class="logo-badge">💄</div>
+    <h1>Barbie AI</h1>
+    <p>AI Style Consultation Studio</p>
+  </div>
+
+  <div class="field">
+    <label for="phoneInput">Mobile Number</label>
+    <div class="phone-input-wrap">
+      <span class="phone-prefix">🇮🇳 +91</span>
+      <input id="phoneInput" type="tel" inputmode="numeric" placeholder="9876543210" maxlength="10" autocomplete="tel" oninput="onPhoneInput(this)"/>
+    </div>
+    <div id="phoneHint">Enter 10-digit mobile number</div>
+  </div>
+
+  <div class="field">
+    <label>6-Digit PIN</label>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div class="numpad">
+      <button class="np-btn" onclick="numPress('1')">1</button>
+      <button class="np-btn" onclick="numPress('2')">2</button>
+      <button class="np-btn" onclick="numPress('3')">3</button>
+      <button class="np-btn" onclick="numPress('4')">4</button>
+      <button class="np-btn" onclick="numPress('5')">5</button>
+      <button class="np-btn" onclick="numPress('6')">6</button>
+      <button class="np-btn" onclick="numPress('7')">7</button>
+      <button class="np-btn" onclick="numPress('8')">8</button>
+      <button class="np-btn" onclick="numPress('9')">9</button>
+      <button class="np-btn" style="visibility:hidden" disabled></button>
+      <button class="np-btn" onclick="numPress('0')">0</button>
+      <button class="np-btn del" onclick="numDel()">⌫</button>
+    </div>
+  </div>
+
+  <button class="login-btn" id="loginBtn" onclick="doLogin()" disabled>
+    <span id="loginBtnLabel">Login</span>
+  </button>
+
+  <div class="err-msg" id="errMsg"></div>
+
+  <p class="footer-note">Salon staff? <a href="admin-login.html">Admin login →</a></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ── Config — fresh Supabase project for Barbie ─────────────────
+const SUPABASE_URL      = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+// ────────────────────────────────────────────────────────────
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let phoneVerified = false;
+let pin = '';
+
+if (localStorage.getItem('barbie_auth')) window.location.href = '/dashboard';
+
+function onPhoneInput(el) {
+  let val = el.value.replace(/\D/g, '');
+  if (val.length > 10) val = val.slice(0, 10);
+  el.value = val;
+
+  const hint = document.getElementById('phoneHint');
+  if (val.length === 0) { hint.textContent = 'Enter 10-digit mobile number'; hint.style.color = ''; }
+  else if (val.length < 10) { hint.textContent = `${val.length}/10 digits`; hint.style.color = 'var(--gray-dk)'; }
+  else { hint.textContent = '✓ Ready to continue'; hint.style.color = 'var(--rose-dark)'; }
+
+  if (phoneVerified) resetPhoneVerification();
+}
+
+document.getElementById('phoneInput').addEventListener('keydown', e => { if (e.key === 'Enter') verifyPhone(); });
+document.getElementById('phoneInput').addEventListener('input', function() {
+  const digits = this.value.replace(/\D/g, '');
+  if (digits.length === 10 && !phoneVerified) setTimeout(verifyPhone, 300);
+});
+
+async function verifyPhone() {
+  const digits = document.getElementById('phoneInput').value.replace(/\D/g, '');
+  if (digits.length !== 10) { showErr('Please enter a valid 10-digit phone number.'); shakeCard(); return; }
+
+  const fullPhone = '+91' + digits;
+  hideErr();
+
+  const phoneInput = document.getElementById('phoneInput');
+  const hint = document.getElementById('phoneHint');
+  phoneInput.disabled = true;
+  hint.textContent = 'Checking…'; hint.style.color = 'var(--gray-dk)';
+
+  const { data, error } = await db.from('users').select('id, is_active').eq('phone', fullPhone).maybeSingle();
+
+  phoneInput.disabled = false;
+
+  if (error) {
+    hint.textContent = 'Enter 10-digit mobile number'; hint.style.color = '';
+    showErr('Connection error. Please check internet and try again.'); shakeCard(); return;
+  }
+  if (!data) {
+    hint.textContent = 'Enter 10-digit mobile number'; hint.style.color = '';
+    showErr('Phone number not registered. Contact your admin.'); shakeCard(); return;
+  }
+  if (data.is_active === false) {
+    hint.textContent = 'Enter 10-digit mobile number'; hint.style.color = '';
+    showErr('This account has been deactivated. Contact your admin.'); shakeCard(); return;
+  }
+
+  phoneVerified = true;
+  hint.textContent = '✓ Verified — enter your PIN below'; hint.style.color = 'var(--rose-dark)';
+}
+
+function resetPhoneVerification() { phoneVerified = false; pin = ''; updateDots(); checkReady(); }
+
+function numPress(d) {
+  if (pin.length >= 6) return;
+  pin += d; updateDots(); checkReady();
+  if (pin.length === 6) setTimeout(doLogin, 150);
+}
+function numDel() { pin = pin.slice(0, -1); updateDots(); checkReady(); }
+function updateDots() {
+  document.querySelectorAll('.pin-dot').forEach((d, i) => d.classList.toggle('filled', i < pin.length));
+}
+function checkReady() { document.getElementById('loginBtn').disabled = !(phoneVerified && pin.length === 6); }
+
+async function doLogin() {
+  if (pin.length < 6 || !phoneVerified) return;
+
+  const btn = document.getElementById('loginBtn');
+  const lbl = document.getElementById('loginBtnLabel');
+  btn.disabled = true; lbl.innerHTML = '<div class="spinner"></div>';
+
+  const digits    = document.getElementById('phoneInput').value.replace(/\D/g, '');
+  const fullPhone = '+91' + digits;
+  const pinHash   = await hashPin(pin);
+
+  const { data, error } = await db.from('users')
+    .select('id, name, phone, role, is_active')
+    .eq('phone', fullPhone).eq('pin_hash', pinHash).maybeSingle();
+
+  btn.disabled = false; lbl.textContent = 'Login';
+
+  if (error) { showErr('Connection error: ' + error.message); shakeCard(); return; }
+  if (!data) { showErr('Incorrect PIN. Please try again.'); shakeCard(); pin = ''; updateDots(); return; }
+  if (data.is_active === false) { showErr('This account has been deactivated. Contact your admin.'); shakeCard(); return; }
+
+  localStorage.setItem('barbie_auth', JSON.stringify({
+    id: data.id, name: data.name, phone: data.phone, role: data.role, ts: Date.now()
+  }));
+
+  window.location.href = '/dashboard';
+}
+
+async function hashPin(p) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(p));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function showErr(msg) { const el = document.getElementById('errMsg'); el.textContent = msg; el.style.display = 'flex'; }
+function hideErr() { document.getElementById('errMsg').style.display = 'none'; }
+function shakeCard() {
+  const card = document.getElementById('loginCard');
+  card.classList.add('shake');
+  setTimeout(() => card.classList.remove('shake'), 350);
+}
+
+document.getElementById('phoneInput').focus();
+</script>
+</body>
+</html>

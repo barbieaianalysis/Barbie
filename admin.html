@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Barbie AI · Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --rose:#b3536a; --rose-dark:#7a2e42; --rose-lt:#fdf1f0;
+  --gold:#c9a66b; --gold-lt:#faf3e6;
+  --cream:#fdf7f3; --white:#ffffff;
+  --gray-lt:#f3ece9; --gray:#ddd0cb; --gray-dk:#8a7b76; --ink:#2b2320;
+  --green:#166534; --radius:10px;
+}
+body { font-family:'Poppins', sans-serif; background:var(--cream); color:var(--ink); min-height:100vh; }
+header {
+  background:#fff; border-bottom:1px solid var(--gray-lt); padding:12px 20px;
+  display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:10;
+}
+.hdr-brand { display:flex; align-items:center; gap:10px; }
+.hdr-badge { width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg, var(--rose), var(--rose-dark)); display:flex; align-items:center; justify-content:center; font-size:16px; }
+.hdr-brand h1 { font-family:'Playfair Display', serif; font-size:18px; color:var(--rose-dark); }
+.hdr-brand span { font-size:11px; color:var(--gray-dk); margin-left:6px; }
+.hdr-logout { border:1px solid var(--gray); background:#fff; border-radius:8px; padding:7px 12px; font-size:12.5px; color:var(--gray-dk); cursor:pointer; }
+.hdr-logout:hover { border-color:var(--rose); color:var(--rose-dark); }
+
+.tabbar { display:flex; gap:4px; padding:8px 20px; background:#fff; border-bottom:1px solid var(--gray-lt); overflow-x:auto; }
+.tab { padding:9px 16px; border-radius:20px; font-size:13px; font-weight:500; color:var(--gray-dk); cursor:pointer; white-space:nowrap; }
+.tab:hover { background:var(--rose-lt); }
+.tab.active { background:var(--rose); color:#fff; }
+
+.wrap { max-width:1080px; margin:0 auto; padding:24px 20px; }
+.panel { display:none; }
+.panel.active { display:block; }
+
+.section-title { font-family:'Playfair Display', serif; font-size:21px; color:var(--rose-dark); margin-bottom:14px; }
+
+/* Cost dashboard */
+.cost-cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:12px; margin-bottom:20px; }
+.cost-card { background:#fff; border:1px solid var(--gray-lt); border-radius:var(--radius); padding:16px; }
+.cost-card .cc-label { font-size:11.5px; color:var(--gray-dk); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:6px; }
+.cost-card .cc-val { font-size:22px; font-weight:700; color:var(--rose-dark); }
+.cost-card .cc-sub { font-size:11px; color:var(--gray-dk); margin-top:2px; }
+
+table { width:100%; border-collapse:collapse; background:#fff; border-radius:var(--radius); overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.03); }
+th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:var(--gray-dk); padding:10px 14px; background:var(--gray-lt); }
+td { padding:10px 14px; font-size:13.5px; border-top:1px solid var(--gray-lt); }
+tr:hover td { background:var(--rose-lt); }
+
+.info-box { background:var(--gold-lt); border:1px solid #e8d4ab; border-radius:var(--radius); padding:12px 16px; font-size:12px; color:#6b5420; margin-bottom:18px; line-height:1.6; }
+
+/* Users */
+.user-form { display:flex; flex-wrap:wrap; gap:10px; background:#fff; border:1px solid var(--gray-lt); border-radius:var(--radius); padding:16px; margin-bottom:18px; }
+.user-form input, .user-form select {
+  height:40px; border:1px solid var(--gray); border-radius:8px; padding:0 12px; font-size:13.5px; background:var(--gray-lt); outline:none;
+}
+.user-form input:focus, .user-form select:focus { border-color:var(--rose); background:#fff; }
+.user-form button {
+  height:40px; padding:0 18px; border:none; border-radius:8px; background:linear-gradient(135deg, var(--rose), var(--rose-dark));
+  color:#fff; font-weight:600; font-size:13.5px; cursor:pointer;
+}
+.badge { padding:2px 9px; border-radius:12px; font-size:11px; font-weight:600; }
+.badge.active { background:#f0fdf4; color:var(--green); }
+.badge.inactive { background:#fef2f2; color:#991b1b; }
+.badge.admin { background:var(--gold-lt); color:#8a6a1f; }
+.badge.client { background:var(--rose-lt); color:var(--rose-dark); }
+.row-btn { border:1px solid var(--gray); background:#fff; border-radius:6px; padding:4px 10px; font-size:11.5px; cursor:pointer; color:var(--gray-dk); }
+.row-btn:hover { border-color:var(--rose); color:var(--rose-dark); }
+
+.reports-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(140px,1fr)); gap:12px; }
+.rg-card { background:#fff; border:1px solid var(--gray-lt); border-radius:var(--radius); overflow:hidden; }
+.rg-card img { width:100%; aspect-ratio:1; object-fit:cover; }
+.rg-card .rg-info { padding:8px 10px; }
+.rg-card .rg-mod { font-size:11.5px; font-weight:600; color:var(--rose-dark); text-transform:capitalize; }
+.rg-card .rg-name { font-size:10.5px; color:var(--gray-dk); }
+
+.loading-txt { color:var(--gray-dk); font-size:13px; padding:20px 0; text-align:center; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-brand"><div class="hdr-badge">💄</div><h1>Barbie AI <span>· Admin</span></h1></div>
+  <button class="hdr-logout" onclick="logout()">Logout</button>
+</header>
+
+<div class="tabbar">
+  <div class="tab active" id="tab-costs" onclick="switchTab('costs')">💰 Costs</div>
+  <div class="tab" id="tab-users" onclick="switchTab('users')">👥 Users</div>
+  <div class="tab" id="tab-reports" onclick="switchTab('reports')">🖼️ All Looks</div>
+</div>
+
+<div class="wrap">
+
+  <!-- ── COSTS PANEL ── -->
+  <div class="panel active" id="panel-costs">
+    <div class="section-title">Gemini API Cost Tracking</div>
+    <div class="info-box">
+      Model: <strong>gemini-3.1-flash-image-preview</strong> · Estimated cost per 16-look grid generation ≈ <strong id="perCallCost">—</strong>.
+      Source pricing: <a href="https://ai.google.dev/gemini-api/docs/pricing" target="_blank" style="color:#6b5420">ai.google.dev/gemini-api/docs/pricing</a>
+    </div>
+    <div class="cost-cards" id="costCards"><div class="loading-txt">Loading cost data…</div></div>
+
+    <div class="section-title" style="font-size:16px; margin-top:24px;">By Module</div>
+    <table>
+      <thead><tr><th>Module</th><th>Total Generations</th><th>Estimated Cost</th></tr></thead>
+      <tbody id="costTableBody"><tr><td colspan="3" class="loading-txt">Loading…</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- ── USERS PANEL ── -->
+  <div class="panel" id="panel-users">
+    <div class="section-title">Manage Users</div>
+    <div class="user-form">
+      <input id="newName" placeholder="Full name" style="flex:1; min-width:140px;"/>
+      <input id="newPhone" placeholder="10-digit phone" maxlength="10" style="width:150px;"/>
+      <input id="newPin" placeholder="6-digit PIN" maxlength="6" style="width:120px;"/>
+      <select id="newRole"><option value="client">Client</option><option value="admin">Admin</option></select>
+      <button onclick="addUser()">Add User</button>
+    </div>
+    <table>
+      <thead><tr><th>Name</th><th>Phone</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody id="usersTableBody"><tr><td colspan="5" class="loading-txt">Loading…</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- ── REPORTS PANEL ── -->
+  <div class="panel" id="panel-reports">
+    <div class="section-title">All Generated Looks</div>
+    <div class="reports-grid" id="reportsGrid"><div class="loading-txt">Loading…</div></div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ============================================================
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+// ============================================================
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── Auth guard: admin-only ──
+const adminSession = JSON.parse(localStorage.getItem('barbie_user') || 'null');
+if (!adminSession || adminSession.role !== 'admin') {
+  window.location.replace('/admin-login.html');
+}
+function logout() { localStorage.removeItem('barbie_user'); localStorage.removeItem('barbie_auth'); window.location.href = '/admin-login.html'; }
+
+// ── Tabs ──
+const TABS = ['costs', 'users', 'reports'];
+function switchTab(id) {
+  TABS.forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === id);
+    document.getElementById('panel-' + t).classList.toggle('active', t === id);
+  });
+  if (id === 'users') loadUsers();
+  if (id === 'reports') loadAllReports();
+}
+
+// ════════════════════════════════════════════════
+// GEMINI API PRICING — gemini-3.1-flash-image-preview
+// Input image: 1120 tokens @ $0.50/1M · Output image (1K): $0.067/image
+// Output text: ~200 tokens @ $3.00/1M · Input text: ~800 tokens @ $0.50/1M
+// ════════════════════════════════════════════════
+const USD_TO_INR    = 84;
+const IMG_IN_TOKENS = 1120;
+const IN_PER_TOK     = 0.50 / 1_000_000;
+const IMG_OUT_COST   = 0.067;
+const OUT_PER_TOK    = 3.00 / 1_000_000;
+const AVG_IN_TEXT    = 800;
+const AVG_OUT_TEXT   = 200;
+const COST_USD_PER_CALL =
+  (IMG_IN_TOKENS * IN_PER_TOK) + (AVG_IN_TEXT * IN_PER_TOK) + IMG_OUT_COST + (AVG_OUT_TEXT * OUT_PER_TOK);
+
+function costINR(calls) { return calls * COST_USD_PER_CALL * USD_TO_INR; }
+function fmtINR(v) { return `₹${v.toFixed(2)}`; }
+
+document.getElementById('perCallCost').textContent = fmtINR(costINR(1)) + ' per generation';
+
+const MODULE_LIST = ['hairstyle', 'haircolour', 'saree', 'chudidar'];
+
+async function loadCosts() {
+  try {
+    const { data, error } = await db.from('barbie_grid_reports').select('module');
+    const counts = { hairstyle:0, haircolour:0, saree:0, chudidar:0 };
+    if (!error && data) data.forEach(r => { if (counts[r.module] !== undefined) counts[r.module]++; });
+
+    const total = Object.values(counts).reduce((a,b) => a+b, 0);
+    const totalCost = costINR(total);
+
+    document.getElementById('costCards').innerHTML = `
+      <div class="cost-card"><div class="cc-label">Total Generations</div><div class="cc-val">${total}</div></div>
+      <div class="cost-card"><div class="cc-label">Total Est. Cost</div><div class="cc-val">${fmtINR(totalCost)}</div></div>
+      <div class="cost-card"><div class="cc-label">Avg. Cost / Look</div><div class="cc-val">${fmtINR(costINR(1))}</div></div>
+    `;
+
+    document.getElementById('costTableBody').innerHTML = MODULE_LIST.map(m => `
+      <tr><td style="text-transform:capitalize">${m}</td><td>${counts[m]}</td><td>${fmtINR(costINR(counts[m]))}</td></tr>
+    `).join('');
+  } catch (e) {
+    document.getElementById('costCards').innerHTML = '<div class="loading-txt">Could not load cost data.</div>';
+  }
+}
+loadCosts();
+
+// ── Users ──
+async function loadUsers() {
+  const tb = document.getElementById('usersTableBody');
+  tb.innerHTML = '<tr><td colspan="5" class="loading-txt">Loading…</td></tr>';
+  const { data, error } = await db.from('users').select('id, name, phone, role, is_active').order('name');
+  if (error || !data) { tb.innerHTML = '<tr><td colspan="5" class="loading-txt">Could not load users.</td></tr>'; return; }
+  if (data.length === 0) { tb.innerHTML = '<tr><td colspan="5" class="loading-txt">No users yet.</td></tr>'; return; }
+  tb.innerHTML = data.map(u => `
+    <tr>
+      <td>${u.name || '—'}</td>
+      <td>${u.phone}</td>
+      <td><span class="badge ${u.role}">${u.role}</span></td>
+      <td><span class="badge ${u.is_active ? 'active' : 'inactive'}">${u.is_active ? 'Active' : 'Inactive'}</span></td>
+      <td><button class="row-btn" onclick="toggleUser('${u.id}', ${!u.is_active})">${u.is_active ? 'Deactivate' : 'Activate'}</button></td>
+    </tr>
+  `).join('');
+}
+
+async function addUser() {
+  const name  = document.getElementById('newName').value.trim();
+  const phoneDigits = document.getElementById('newPhone').value.trim();
+  const pin   = document.getElementById('newPin').value.trim();
+  const role  = document.getElementById('newRole').value;
+
+  if (!name) { alert('Enter a name.'); return; }
+  if (phoneDigits.length !== 10) { alert('Enter a valid 10-digit phone number.'); return; }
+  if (pin.length !== 6 || isNaN(pin)) { alert('PIN must be exactly 6 digits.'); return; }
+
+  const pinHash = await sha256(pin);
+  const { error } = await db.from('users').insert({
+    name, phone: '+91' + phoneDigits, pin_hash: pinHash, role, is_active: true
+  });
+
+  if (error) { alert('Could not add user: ' + error.message); return; }
+
+  document.getElementById('newName').value = '';
+  document.getElementById('newPhone').value = '';
+  document.getElementById('newPin').value = '';
+  loadUsers();
+}
+
+async function toggleUser(id, newActive) {
+  const { error } = await db.from('users').update({ is_active: newActive }).eq('id', id);
+  if (error) { alert('Could not update user: ' + error.message); return; }
+  loadUsers();
+}
+
+async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── All Reports (admin view) ──
+async function loadAllReports() {
+  const grid = document.getElementById('reportsGrid');
+  grid.innerHTML = '<div class="loading-txt">Loading…</div>';
+  const { data, error } = await db.from('barbie_grid_reports')
+    .select('module, image_url, user_name, created_at')
+    .order('created_at', { ascending: false })
+    .limit(100);
+  if (error || !data || data.length === 0) { grid.innerHTML = '<div class="loading-txt">No looks generated yet.</div>'; return; }
+  grid.innerHTML = data.map(r => `
+    <div class="rg-card">
+      <img src="${r.image_url}" alt="${r.module}"/>
+      <div class="rg-info">
+        <div class="rg-mod">${r.module}</div>
+        <div class="rg-name">${r.user_name || 'Unknown'}</div>
+      </div>
+    </div>
+  `).join('');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Barbie AI · Style Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="manifest" href="/manifest.json"/>
+<meta name="theme-color" content="#b3536a"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --rose:#b3536a; --rose-dark:#7a2e42; --rose-lt:#fdf1f0; --rose-lt2:#fbe6e6;
+  --gold:#c9a66b; --gold-lt:#faf3e6;
+  --cream:#fdf7f3; --white:#ffffff;
+  --gray-lt:#f3ece9; --gray:#ddd0cb; --gray-dk:#8a7b76; --ink:#2b2320;
+  --radius:10px; --radius-lg:18px;
+  --shadow:0 2px 12px rgba(122,46,66,0.10);
+  --shadow-lg:0 12px 40px rgba(122,46,66,0.16);
+}
+html, body { height:100%; }
+body {
+  font-family:'Poppins', sans-serif; background:var(--cream); color:var(--ink);
+  min-height:100vh; display:flex; flex-direction:column;
+}
+
+/* ── Header ── */
+header {
+  background:var(--white); border-bottom:1px solid var(--gray-lt);
+  padding:12px 20px; display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:20; box-shadow:0 1px 4px rgba(0,0,0,0.03);
+}
+.hdr-brand { display:flex; align-items:center; gap:10px; }
+.hdr-badge {
+  width:36px; height:36px; border-radius:10px;
+  background:linear-gradient(135deg, var(--rose) 0%, var(--rose-dark) 100%);
+  display:flex; align-items:center; justify-content:center; font-size:17px;
+}
+.hdr-brand h1 { font-family:'Playfair Display', serif; font-size:19px; color:var(--rose-dark); }
+.hdr-user { display:flex; align-items:center; gap:10px; }
+.hdr-avatar {
+  width:34px; height:34px; border-radius:50%; background:var(--rose-lt); color:var(--rose-dark);
+  display:flex; align-items:center; justify-content:center; font-weight:600; font-size:14px;
+}
+.hdr-name { font-size:13.5px; font-weight:500; color:var(--ink); }
+.hdr-logout {
+  border:1px solid var(--gray); background:var(--white); border-radius:8px;
+  padding:7px 12px; font-size:12.5px; color:var(--gray-dk); cursor:pointer; transition:all .15s;
+}
+.hdr-logout:hover { border-color:var(--rose); color:var(--rose-dark); }
+
+/* ── Tabs ── */
+.tabbar {
+  display:flex; gap:4px; padding:8px 16px; background:var(--white);
+  border-bottom:1px solid var(--gray-lt); overflow-x:auto; position:sticky; top:60px; z-index:19;
+}
+.tab {
+  flex-shrink:0; padding:9px 16px; border-radius:20px; font-size:13.5px; font-weight:500;
+  color:var(--gray-dk); cursor:pointer; transition:all .15s; white-space:nowrap;
+  display:flex; align-items:center; gap:6px; border:1px solid transparent;
+}
+.tab:hover { background:var(--rose-lt); }
+.tab.active { background:var(--rose); color:#fff; }
+.tab.soon { opacity:0.55; cursor:default; }
+.tab.soon:hover { background:transparent; }
+.tab-soon-badge {
+  font-size:9px; font-weight:700; background:var(--gold); color:#5c4820;
+  padding:1px 6px; border-radius:8px; letter-spacing:0.03em; text-transform:uppercase;
+}
+
+/* ── Layout ── */
+.wrap { flex:1; display:flex; flex-direction:column; }
+.panel { display:none; flex:1; }
+.panel.active { display:flex; }
+.module-grid {
+  display:grid; grid-template-columns:340px 1fr; gap:0; flex:1; width:100%;
+}
+@media (max-width: 860px) { .module-grid { grid-template-columns:1fr; } }
+
+aside {
+  background:var(--white); border-right:1px solid var(--gray-lt);
+  padding:20px; display:flex; flex-direction:column; gap:16px;
+}
+.aside-title { font-family:'Playfair Display', serif; font-size:19px; color:var(--rose-dark); }
+.aside-sub { font-size:12.5px; color:var(--gray-dk); line-height:1.5; }
+
+.img-tabs { display:flex; gap:8px; }
+.img-tab {
+  flex:1; text-align:center; padding:9px; border-radius:8px; font-size:12.5px; font-weight:500;
+  background:var(--gray-lt); color:var(--gray-dk); cursor:pointer; border:1.5px solid transparent;
+}
+.img-tab.active { background:var(--rose-lt); color:var(--rose-dark); border-color:var(--rose); }
+
+.upload-zone {
+  border:2px dashed var(--gray); border-radius:var(--radius-lg); padding:28px 16px;
+  text-align:center; cursor:pointer; transition:all .15s; background:var(--gray-lt);
+}
+.upload-zone:hover { border-color:var(--rose); background:var(--rose-lt); }
+.upload-zone svg { width:34px; height:34px; stroke:var(--gray-dk); fill:none; stroke-width:1.6; margin-bottom:8px; }
+.upload-zone h4 { font-size:13.5px; color:var(--ink); margin-bottom:4px; }
+.upload-zone p { font-size:11.5px; color:var(--gray-dk); }
+
+.camera-box { position:relative; border-radius:var(--radius-lg); overflow:hidden; background:#000; aspect-ratio:3/4; }
+.camera-box video, .camera-box img { width:100%; height:100%; object-fit:cover; display:none; }
+.camera-placeholder { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#fff; flex-direction:column; gap:10px; }
+.camera-placeholder svg { width:40px; height:40px; stroke:#fff; fill:none; stroke-width:1.5; opacity:0.7; }
+.cam-btn { padding:9px 18px; background:var(--rose); color:#fff; border:none; border-radius:20px; font-size:12.5px; font-weight:500; cursor:pointer; }
+.camera-controls { position:absolute; bottom:14px; left:0; right:0; display:none; justify-content:center; gap:14px; }
+.cam-round { width:52px; height:52px; border-radius:50%; background:#fff; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.cam-flip { width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.25); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.cam-err { display:none; margin-top:8px; font-size:12px; color:#b91c1c; }
+
+.preview-card { display:flex; align-items:center; gap:10px; background:var(--gray-lt); border-radius:var(--radius); padding:8px; position:relative; }
+.preview-card img { width:52px; height:52px; border-radius:8px; object-fit:cover; }
+.preview-info { flex:1; min-width:0; }
+.preview-info p { font-size:12.5px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.preview-info span { font-size:11px; color:var(--rose-dark); }
+.rm-btn { background:none; border:none; font-size:18px; color:var(--gray-dk); cursor:pointer; padding:4px 8px; }
+
+.prompt-accordion { display:none; }
+.prompt-summary { font-size:11.5px; color:var(--gray-dk); cursor:pointer; padding:8px 0; user-select:none; }
+.prompt-text { font-size:10.5px; color:var(--gray-dk); background:var(--gray-lt); border-radius:8px; padding:10px; max-height:120px; overflow-y:auto; white-space:pre-wrap; line-height:1.5; margin-top:6px; display:none; }
+
+.gen-btn {
+  width:100%; height:46px; border:none; border-radius:var(--radius);
+  background:linear-gradient(135deg, var(--rose) 0%, var(--rose-dark) 100%);
+  color:#fff; font-size:14.5px; font-weight:600; cursor:pointer; transition:opacity .15s;
+  display:flex; align-items:center; justify-content:center; gap:8px; margin-top:auto;
+}
+.gen-btn:hover { opacity:0.9; }
+.gen-btn:disabled { opacity:0.4; cursor:not-allowed; }
+.spinner { width:15px; height:15px; border:2px solid rgba(255,255,255,0.4); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; display:inline-block; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+main.output { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px 20px; gap:16px; overflow-y:auto; }
+.empty-state { text-align:center; max-width:340px; }
+.empty-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:5px; width:150px; margin:0 auto 18px; }
+.eg-cell { aspect-ratio:1; background:var(--rose-lt); border-radius:4px; }
+.empty-state h3 { font-family:'Playfair Display', serif; font-size:19px; color:var(--rose-dark); margin-bottom:6px; }
+.empty-state p { font-size:13px; color:var(--gray-dk); line-height:1.6; }
+
+.status-bar { display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:var(--radius); font-size:13px; }
+.status-bar.info { background:var(--rose-lt); color:var(--rose-dark); }
+.status-bar.success { background:#f0fdf4; color:#166534; }
+.status-bar.error { background:#fef2f2; color:#991b1b; }
+.spin2 { width:15px; height:15px; border:2px solid rgba(122,46,66,0.25); border-top-color:var(--rose-dark); border-radius:50%; animation:spin .8s linear infinite; flex-shrink:0; }
+
+.result-wrap { width:100%; max-width:640px; display:flex; flex-direction:column; gap:12px; }
+.result-label { font-family:'Playfair Display', serif; font-size:18px; color:var(--rose-dark); text-align:center; }
+.result-img-box { border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--shadow-lg); background:#fff; }
+.result-img-box img { width:100%; display:block; }
+.result-actions { display:flex; gap:10px; }
+.result-actions button {
+  flex:1; height:42px; border-radius:var(--radius); font-size:13px; font-weight:500; cursor:pointer; border:1.5px solid var(--gray);
+  background:var(--white); color:var(--ink); display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.result-actions button.primary { background:var(--rose); border-color:var(--rose); color:#fff; }
+
+/* ── Reports panel ── */
+.reports-wrap { max-width:900px; margin:0 auto; padding:24px 20px; width:100%; }
+.reports-wrap h2 { font-family:'Playfair Display', serif; font-size:22px; color:var(--rose-dark); margin-bottom:16px; }
+.report-row { display:flex; align-items:center; gap:12px; background:var(--white); border:1px solid var(--gray-lt); border-radius:var(--radius); padding:12px; margin-bottom:8px; }
+.report-row img { width:48px; height:48px; border-radius:8px; object-fit:cover; }
+.report-row .r-info { flex:1; }
+.report-row .r-module { font-size:13px; font-weight:600; color:var(--rose-dark); text-transform:capitalize; }
+.report-row .r-date { font-size:11.5px; color:var(--gray-dk); }
+
+@media (max-width: 640px) {
+  .hdr-name { display:none; }
+  .tabbar { top:56px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-brand">
+    <div class="hdr-badge">💄</div>
+    <h1>Barbie AI</h1>
+  </div>
+  <div class="hdr-user">
+    <span class="hdr-name" id="userName">—</span>
+    <div class="hdr-avatar" id="userAvatar">?</div>
+    <button class="hdr-logout" onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<div class="tabbar" id="tabbar">
+  <div class="tab active" id="tab-hairstyle" onclick="switchModule('hairstyle')">💇‍♀️ Hairstyle</div>
+  <div class="tab" id="tab-haircolour" onclick="switchModule('haircolour')">🎨 Hair Colour</div>
+  <div class="tab" id="tab-saree" onclick="switchModule('saree')">🥻 Saree</div>
+  <div class="tab" id="tab-chudidar" onclick="switchModule('chudidar')">👗 Chudidar</div>
+  <div class="tab soon" title="Coming soon">👚 Outfit <span class="tab-soon-badge">Soon</span></div>
+  <div class="tab" id="tab-reports" onclick="switchModule('reports')">📋 My Looks</div>
+</div>
+
+<div class="wrap" id="modulesRoot"></div>
+
+<canvas id="snapCanvas" style="display:none;"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ============================================================
+//  CONFIGURATION
+// ============================================================
+const SUPABASE_URL      = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+// ⚠️ REQUIRED: Replace with your actual Cloudflare Worker URL before deploying.
+const WORKER_URL = 'YOUR_CLOUDFLARE_WORKER_URL';
+const GRID_BUCKET = 'barbie-grid-shares';
+// ============================================================
+
+// ── Auth guard ──────────────────────────────────────────────
+let _session = localStorage.getItem('barbie_auth') || localStorage.getItem('barbie_user');
+if (!_session) { window.location.replace('/'); }
+const session = JSON.parse(_session || '{}');
+
+const nameEl = document.getElementById('userName');
+const avatarEl = document.getElementById('userAvatar');
+if (session.name) {
+  nameEl.textContent = session.name;
+  avatarEl.textContent = session.name.charAt(0).toUpperCase();
+}
+
+function logout() {
+  localStorage.removeItem('barbie_auth');
+  localStorage.removeItem('barbie_user');
+  window.location.href = '/';
+}
+
+// ── Supabase client (lazy, only needed for saving reports) ──
+let _sb = null;
+function getSb() {
+  if (!_sb && window.supabase) _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return _sb;
+}
+
+// ── Prompts (inserted from Word docs, verbatim) ──────────────
+const PROMPTS = JSON.parse('{"hairstyle": "Use the uploaded image as the STRICT LOCKED MASTER REFERENCE IMAGE.\\n\\nYour task is to carefully analyze the uploaded lady\'s face and natural hair characteristics and create a professional hairstyle consultation showing the EXACT SAME LADY with 16 different, genuinely suitable hairstyles.\\n\\nABSOLUTE IMAGE LOCK — CRITICAL\\n\\nTreat the uploaded image as a locked master photograph.\\n\\nThe lady must remain exactly the same in all 16 grid cells.\\n\\nDo not regenerate, redesign, beautify, reinterpret, or modify any part of the person or original image except the hair.\\n\\nStrictly preserve exactly:\\n- Facial identity\\n- Face shape and facial proportions\\n- Forehead\\n- Eyes, eyebrows, nose, lips, jawline and cheeks\\n- Ears\\n- Skin tone and skin texture\\n- Apparent age\\n- Exact facial expression\\n- Body shape, size and proportions\\n- Exact posture and pose\\n- Clothing\\n- Jewelry and accessories\\n- Head position\\n- Body orientation\\n- Camera angle and camera distance\\n- Image framing and crop\\n- Background\\n- Lighting and shadows\\n- Exposure\\n- Colour grading\\n- Overall photographic style\\n\\nDO NOT change anything except the hairstyle.\\n\\nONLY PERMITTED MODIFICATION\\n\\nThe ONLY element allowed to change is the hair and hairstyle.\\n\\nPermitted changes include:\\n- Haircut\\n- Hair length\\n- Layers\\n- Hair parting\\n- Hair direction\\n- Fringe or bangs\\n- Face-framing sections\\n- Straight, wavy or curly styling\\n- Realistic volume\\n- Hairstyle structure\\n\\nDo not alter the face, body, pose, clothing, background, lighting, or camera to make a hairstyle look better.\\n\\nThe hairstyle must adapt to the exact uploaded lady.\\n\\nHAIR ANALYSIS AND SELECTION\\n\\nCarefully analyze the uploaded lady\'s:\\n- Face shape and facial proportions\\n- Forehead size and shape\\n- Jawline and cheekbones\\n- Natural hairline\\n- Hair density and thickness\\n- Natural texture and curl/wave pattern\\n- Existing hair length\\n- Natural growth direction\\n- Hair volume\\n- Overall facial balance\\n- Apparent age suitability\\n\\nBased on this analysis, intelligently select 16 visually distinct hairstyles that genuinely suit her.\\n\\nDo not select hairstyles randomly.\\n\\nAvoid near-duplicate hairstyles. Ensure clear variety across short, medium and long styles wherever genuinely suitable, including appropriate variations of layers, bobs, lobs, fringe, parting, straight styling, waves and curls.\\n\\nDo not force unsuitable hairstyles merely to fill the grid.\\n\\nSTRICT HAIR REALISM\\n\\nEvery hairstyle must:\\n- Follow realistic hair growth\\n- Respect the natural hairline\\n- Respect realistic hair density and thickness\\n- Maintain believable scalp coverage\\n- Blend naturally around the forehead, temples, ears and neck\\n- Have realistic individual hair strands\\n- Have physically believable volume\\n- Look naturally attached to the scalp\\n- Look achievable by a professional salon\\n\\nAvoid:\\n- Wig-like hair\\n- Artificial hairlines\\n- Floating hair\\n- Impossible volume\\n- Plastic-looking hair\\n- Excessive AI smoothing\\n- Random changes in hair density\\n- Any variation in facial identity\\n\\nFIXED 4 × 4 HAIRSTYLE CONSULTATION GRID — CRITICAL\\n\\nThe final output must be ONE SINGLE IMAGE containing exactly 16 hairstyle variations arranged in a fixed 4 columns × 4 rows grid.\\n\\nDo not create any other grid size. Do not create more than 16 or fewer than 16 hairstyles.\\n\\nEach of the 16 cells must show: THE EXACT SAME UPLOADED LADY — ONLY THE HAIRSTYLE CHANGES.\\n\\nGrid requirements:\\n- Exactly 4 columns\\n- Exactly 4 rows\\n- Exactly 16 cells\\n- Uniform portrait size in every cell\\n- Identical framing and crop\\n- Equal spacing\\n- Perfect alignment\\n- Clean white dividers between cells\\n- Same background in every cell\\n- Same lighting in every cell\\n- Same head position and camera angle\\n- Premium, ultra-realistic salon consultation presentation\\n\\nHAIRSTYLE LABELING\\n\\nAdd a small, clean, readable hairstyle name below each corresponding hairstyle image.\\n\\nThe name must accurately describe the hairstyle actually visible.\\n\\nBefore finalizing, verify that every hairstyle name exactly matches its corresponding hairstyle.\\n\\nDo not use a fashionable hairstyle name if the visible hairstyle does not actually match it.\\n\\nFINAL QUALITY CONTROL\\n\\nBefore finalizing the 4 × 4 grid, verify every one of the 16 cells:\\n\\nIDENTITY CHECK: Exact same uploaded lady. Same facial identity. Same face shape. Same skin tone and texture. Same apparent age. Same expression.\\n\\nBODY CHECK: Same body. Same body proportions. Same clothing and accessories. Same pose and posture.\\n\\nIMAGE CHECK: Same head position. Same camera angle. Same camera distance. Same framing and crop. Same background. Same lighting and shadows. Same photographic style.\\n\\nHAIR CHECK: Only the hairstyle has changed. The hairstyle genuinely suits her. Realistic hair density and texture. Natural hairline. Natural scalp attachment. Clearly distinct from the other 15 hairstyles.\\n\\nGRID CHECK: Exactly 4 × 4. Exactly 16 hairstyle variations. No missing cells. No duplicate cells. No additional images outside the grid.\\n\\nFINAL PRIORITY ORDER\\n\\nPriority 1: Preserve the exact same uploaded lady and identity.\\nPriority 2: Preserve everything else from the original image — face, body, clothing, pose, camera angle, framing, background and lighting.\\nPriority 3: Change only the hairstyle.\\nPriority 4: Intelligently select 16 distinct and genuinely suitable hairstyles.\\nPriority 5: Maintain strict realism in hair density, hairline, texture, growth direction and volume.\\nPriority 6: Maintain a fixed, perfectly aligned 4 × 4 grid.\\nPriority 7: Ensure every hairstyle label exactly matches the hairstyle shown.\\n\\nSTRICT FINAL RULE\\n\\nTreat the uploaded image as a locked master photograph.\\nDo not redesign the lady. Do not change the face. Do not change the body. Do not change the clothing. Do not change the pose. Do not change the background. Do not change the lighting.\\n\\nCHANGE ONLY THE HAIRSTYLE.\\n\\nFINAL OUTPUT: One premium, ultra-realistic hairstyle consultation image containing exactly 16 variations in a fixed 4 × 4 grid, showing the exact same uploaded lady in every cell, with everything identical except the hairstyle.", "haircolour": "Use the uploaded image as the STRICT LOCKED MASTER REFERENCE IMAGE.\\n\\nYour task is to analyze the uploaded lady\'s natural hair colour, skin tone, visible undertone, facial contrast, eyebrows, and overall appearance, then create exactly 16 different hair colour looks that genuinely suit her.\\n\\nSelect the 16 hair colours from realistic L\'Oréal-style professional hair colour shades and colour families, choosing only shades that are suitable for her appearance. Do not select colours randomly.\\n\\nSTRICT IDENTITY & IMAGE LOCK\\n\\nIn all 16 cells, preserve the EXACT SAME UPLOADED LADY.\\n\\nStrictly maintain:\\n- Exact facial identity\\n- Exact face shape and facial proportions\\n- Exact forehead\\n- Exact eyes, eyebrows, nose, lips, jawline, and cheeks\\n- Same skin tone and natural skin texture\\n- Same apparent age\\n- Same facial expression\\n- Same body shape and proportions\\n- Same pose and posture\\n- Same head position and body orientation\\n- Same hairstyle\\n- Same haircut\\n- Same hair length\\n- Same hair volume\\n- Same hair texture\\n- Same hair density\\n- Same hair parting\\n- Same hair direction\\n- Same clothing\\n- Same jewelry and accessories\\n- Same camera angle and distance\\n- Same framing and crop\\n- Same background\\n- Same lighting and shadows\\n- Same exposure and colour grading\\n- Same photographic style\\n\\nDO NOT beautify, redesign, reshape, slim, de-age, retouch excessively, or replace the lady.\\n\\nDO NOT change the hairstyle.\\n\\nCRITICAL RULE: THE HAIR COLOUR MAY CHANGE. EVERYTHING ELSE MUST REMAIN EXACTLY THE SAME.\\n\\nINTELLIGENT HAIR COLOUR ANALYSIS\\n\\nCarefully analyze:\\n- Natural skin tone\\n- Visible skin undertone\\n- Eye and eyebrow contrast\\n- Natural hair colour\\n- Facial contrast level\\n- Overall appearance\\n- Apparent age suitability\\n\\nBased on this analysis, intelligently select exactly 16 distinct, flattering, salon-achievable hair colours inspired by shades available in the L\'Oréal professional and consumer hair-colour range.\\n\\nUse realistic shades from suitable colour families such as: Natural Black, Soft Black, Dark Brown, Chocolate Brown, Mocha Brown, Ash Brown, Cool Brown, Golden Brown, Honey Brown, Caramel Brown, Copper Brown, Auburn Brown, Mahogany Brown, Burgundy, Wine Red, Deep Plum, Warm Chestnut, Cool Beige Brown, Ash Blonde, Honey Blonde, Golden Blonde, Caramel Blonde, Smoky Brown, Mushroom Brown.\\n\\nSelect only 16 shades that genuinely suit the uploaded lady.\\n\\nDo not force unsuitable colours simply to fill the 4×4 grid.\\n\\nEnsure all 16 colours are visibly distinct while remaining realistic and professionally achievable.\\n\\nREALISTIC HAIR COLOUR APPLICATION\\n\\nThe hair colour must look like real professionally coloured hair, not digitally painted hair.\\n\\nMaintain:\\n- Natural roots where appropriate\\n- Realistic colour saturation\\n- Natural depth and dimension\\n- Realistic highlights and lowlights where suitable\\n- Individual hair strand visibility\\n- Natural scalp appearance\\n- Realistic transition between shades\\n- Correct interaction with the original lighting\\n\\nDo not create: Flat painted-looking hair, Neon colours, Artificial glowing colours, Plastic-looking hair, Wig-like appearance, Unnatural scalp colouring, Colour bleeding onto the face or skin, Different hairstyles between cells.\\n\\nHair colour should follow the exact original hairstyle, hairline, texture, length, density, volume, and parting.\\n\\nEXACT 16 HAIR COLOUR VARIATIONS\\n\\nCreate 16 genuinely different hair colour recommendations. Each colour should have its own clearly identifiable tone, such as:\\n1. Natural Black\\n2. Soft Black\\n3. Dark Chocolate Brown\\n4. Mocha Brown\\n5. Ash Brown\\n6. Cool Brown\\n7. Golden Brown\\n8. Honey Brown\\n9. Caramel Brown\\n10. Warm Chestnut Brown\\n11. Copper Brown\\n12. Auburn Brown\\n13. Mahogany Brown\\n14. Burgundy\\n15. Wine Red\\n16. Deep Plum\\n\\nImportant: Before generating, intelligently verify whether each of these colours suits the uploaded lady. If a listed shade is not suitable, replace it with another realistic, flattering L\'Oréal-style shade from an appropriate L\'Oréal colour family.\\n\\nSTRICT 4 × 4 GRID — ABSOLUTELY NON-NEGOTIABLE\\n\\nCreate ONE SINGLE FINAL IMAGE containing EXACTLY 16 hair colour variations.\\n\\nThe layout must be 4 COLUMNS × 4 ROWS ONLY:\\n- Exactly 4 columns\\n- Exactly 4 rows\\n- Exactly 16 equal-sized cells\\n- One hair colour variation per cell\\n- No missing cells\\n- No empty cells\\n- No duplicate cells\\n- No additional images\\n- No additional rows\\n- No additional columns\\n\\nDO NOT create a dynamic grid. DO NOT use 3×4, 3×5, 4×5, 5×5, or any other layout. THE OUTPUT MUST ALWAYS BE EXACTLY 4 × 4.\\n\\nEvery cell must contain the EXACT SAME UPLOADED LADY, with all facial features, hairstyle, body, pose, clothing, background, camera angle, and lighting remaining identical.\\n\\nONLY THE HAIR COLOUR MAY CHANGE.\\n\\nUse: Equal-sized portrait cells, Identical framing in every cell, Perfect horizontal and vertical alignment, Equal spacing, Clean white dividers, Uniform margins, Consistent image scale, Premium professional hair-colour consultation presentation.\\n\\nLABEL EACH CELL\\n\\nPlace a small, clean, readable label below or at the bottom of each corresponding image cell.\\n\\nUse this format: [HAIR COLOUR NAME]\\n\\nExamples: Natural Black, Chocolate Brown, Ash Brown, Caramel Brown, Honey Brown, Burgundy.\\n\\nThe written label must exactly match the visible hair colour. Do not use a label for a colour that is not visibly represented.\\n\\nFINAL QUALITY CONTROL\\n\\nBefore finalizing the image, verify all 16 cells:\\n\\nIDENTITY CHECK: Is this exactly the same uploaded lady? Is her face completely unchanged? Is her skin tone unchanged? Is her apparent age unchanged? Is her expression unchanged?\\n\\nHAIRSTYLE CHECK: Is the exact same hairstyle maintained? Is the haircut unchanged? Is the hair length unchanged? Is the parting unchanged? Is the texture unchanged? Is the volume unchanged? Is the hair density unchanged?\\n\\nHAIR COLOUR CHECK: Is only the hair colour changed? Is each of the 16 colours visibly distinct? Does each colour genuinely suit the uploaded lady? Does the visible colour match its label? Does the colour look realistic and professionally achievable? Does the colour interact naturally with the original lighting?\\n\\nIMAGE CHECK: Same body? Same pose? Same clothing? Same jewelry? Same background? Same camera angle? Same framing? Same lighting?\\n\\nGRID CHECK: Exactly 4 columns? Exactly 4 rows? Exactly 16 hair colours? Equal-sized cells? Perfect alignment? No missing cells? No duplicate cells? No extra images?\\n\\nFINAL OUTPUT — STRICT\\n\\nONE SINGLE PREMIUM, ULTRA-REALISTIC PERSONALIZED HAIR COLOUR CONSULTATION IMAGE.\\n\\nFIXED GRID: 4 × 4 ONLY. TOTAL VARIATIONS: EXACTLY 16. SAME LADY IN ALL 16 CELLS. EXACT SAME HAIRSTYLE IN ALL 16 CELLS. ONLY THE HAIR COLOUR MAY CHANGE.\\n\\nABSOLUTELY NO OTHER GRID SIZE. DO NOT OUTPUT ANYTHING EXCEPT ONE PERFECTLY ALIGNED 4 × 4 GRID WITH EXACTLY 16 DIFFERENT, REALISTIC, L\'ORÉAL-STYLE HAIR COLOUR LOOKS.", "saree": "AI SAREE STYLE & COLOUR CONSULTATION — PERSONALIZED TO THE UPLOADED LADY — FIXED 4 × 4 GRID\\n\\nUse the uploaded image as the STRICT LOCKED MASTER REFERENCE IMAGE.\\n\\nYour task is to carefully analyze the uploaded lady and intelligently determine exactly 16 saree styles, fabrics, colours, designs, borders, draping styles, and blouse combinations that genuinely suit her appearance.\\n\\nThen generate ONE SINGLE PROFESSIONAL VISUAL SAREE CONSULTATION IMAGE containing the EXACT SAME LADY from the uploaded image in all 16 variations, wearing a different recommended saree in each cell.\\n\\nABSOLUTE MASTER PERSON LOCK — CRITICAL\\n\\nTreat the uploaded image as a LOCKED MASTER PHOTOGRAPH.\\n\\nThe uploaded lady must remain the EXACT SAME PERSON in every one of the 16 grid cells.\\n\\nStrictly preserve: Exact facial identity, Exact face shape, Exact facial proportions, Exact forehead, Exact eyes, Exact eyebrows, Exact nose, Exact lips, Exact jawline, Exact cheeks, Exact skin tone, Exact skin texture, Exact apparent age, Exact facial expression, Existing hairstyle, Existing hair colour, Existing jewelry and accessories, unless minimally necessary to accommodate the saree naturally.\\n\\nDo not beautify, redesign, excessively retouch, de-age, reshape, or replace the lady. Do not create a different model. The lady must remain immediately recognizable and identical in all 16 variations.\\n\\nSTRICT BODY STRUCTURE LOCK — NON-NEGOTIABLE\\n\\nMaintain the uploaded lady\'s body exactly as it appears in the original image.\\n\\nPreserve: Exact body shape, Exact body size, Exact body proportions, Exact shoulder width, Exact waist shape, Exact hip proportions, Exact bust proportions, Exact torso proportions, Exact neck length, Exact arm thickness, Exact arm length, Exact leg proportions where visible, Exact posture, Exact pose, Exact body orientation.\\n\\nDO NOT: Make her slimmer, Make her thinner, Make her taller, Make her shorter, Make her curvier, Make her more muscular, Change her proportions, Turn her into a fashion model, Reshape her body to suit the saree.\\n\\nCRITICAL RULE: THE SAREE MUST DRAPE AROUND THE ORIGINAL BODY. THE ORIGINAL BODY MUST NEVER CHANGE TO FIT THE SAREE.\\n\\nThe saree must naturally adapt to the exact body visible in the uploaded image.\\n\\nORIGINAL IMAGE COMPOSITION LOCK\\n\\nMaintain exactly: Same head position, Same body position, Same pose, Same posture, Same arm position, Same hand position where visible, Same body orientation, Same camera angle, Same camera distance, Same image framing, Same crop, Same visible body area, Same background, Same lighting, Same shadows, Same exposure, Same colour grading, Same photographic style.\\n\\nDo not: Zoom in or out, Change the crop, Change the pose, Reposition the arms, Move the hands, Change body orientation, Change the camera perspective, Change the background, Change the lighting.\\n\\nThe ONLY major visual transformation must be the saree and the matching blouse.\\n\\nSTEP 1 — INTELLIGENT PERSONAL SAREE ANALYSIS\\n\\nCarefully analyze the uploaded lady\'s visible characteristics, including: Face shape, Facial proportions, Forehead proportions, Neck proportions, Shoulder proportions, Visible body proportions, Overall silhouette, Visible skin tone, Visible skin undertone, Hair colour, Existing hairstyle, Overall contrast level, Apparent age, Overall visual balance.\\n\\nBased on this analysis, intelligently determine: Which saree fabrics genuinely suit her, Which saree draping styles suit her, Which saree widths and pallu styles look balanced, Which border widths suit her proportions, Which prints and patterns suit her, Which colour families complement her complexion, Which blouse necklines and sleeve styles complement her, Which saree styles suit casual, office, festive, wedding, and premium occasions.\\n\\nDo not make random fashion choices. Every one of the 16 recommendations must be a deliberate styling decision based on the visible characteristics of the uploaded lady.\\n\\nSTEP 2 — SELECT EXACTLY 16 DISTINCT SAREE RECOMMENDATIONS\\n\\nSelect EXACTLY 16 visually distinct, genuinely suitable saree looks. Do not select near-duplicate sarees merely to fill the grid.\\n\\nCreate meaningful variety using suitable saree categories such as:\\n\\nLIGHTWEIGHT & ELEGANT (where suitable): Chiffon saree, Georgette saree, Crepe saree, Soft satin saree, Organza saree, Tissue saree, Lightweight printed saree.\\n\\nNATURAL & SOPHISTICATED (where suitable): Cotton saree, Linen saree, Mul cotton saree, Handloom cotton saree, Chanderi saree, Kota saree.\\n\\nSILK & PREMIUM (where suitable): Soft silk saree, Kanchipuram-inspired silk saree, Banarasi silk saree, Mysore silk saree, Tussar silk saree, Chanderi silk saree, Raw silk saree.\\n\\nCONTEMPORARY & DESIGNER (where suitable): Designer saree, Pre-draped saree, Contemporary printed saree, Minimalist saree, Monochrome saree, Ombre saree, Metallic saree, Embroidered saree, Sequin saree (only if genuinely suitable).\\n\\nREGIONAL & TRADITIONAL (where suitable): South Indian silk style, Traditional temple-border saree, Handloom regional style, Traditional woven saree, Festive ethnic saree.\\n\\nSelect only the 16 saree styles that genuinely complement the uploaded lady. Ensure all 16 recommendations are clearly visually distinct.\\n\\nSTEP 3 — INTELLIGENT COLOUR SELECTION\\n\\nCarefully analyze the uploaded lady\'s visible complexion, undertone, hair colour, and overall contrast. Select colours that genuinely complement her appearance.\\n\\nCreate meaningful variety across the 16 sarees using suitable colour families such as:\\n\\nDEEP & RICH COLOURS: Emerald green, Deep teal, Peacock blue, Royal blue, Navy blue, Wine, Burgundy, Maroon, Deep plum, Forest green.\\n\\nWARM & ELEGANT COLOURS: Mustard, Saffron, Rust, Terracotta, Copper, Coral, Peach, Warm rose.\\n\\nSOFT & REFINED COLOURS: Dusty rose, Blush pink, Mauve, Lavender, Powder blue, Sage green, Mint, Soft beige.\\n\\nPREMIUM NEUTRALS: Ivory, Cream, Champagne, Taupe, Beige, Soft grey, Charcoal, Black.\\n\\nTRADITIONAL COMBINATIONS (where genuinely suitable): Red with gold border, Green with gold border, Royal blue with gold border, Maroon with antique gold, Ivory with temple border, Black with metallic border.\\n\\nDo not assign colours randomly. Choose each colour based on: Skin tone, Visible undertone, Hair colour, Overall contrast, Saree fabric, Occasion suitability, Overall visual harmony.\\n\\nSTEP 4 — SAREE DESIGN, PRINT & BORDER VARIETY\\n\\nFor the 16 selected sarees, intelligently vary: Solid colour, Minimalist design, Small prints, Medium prints, Large prints, Floral designs, Geometric designs, Traditional motifs, Woven patterns, Embroidery, Sequins where suitable, Metallic detailing, Minimal borders, Medium borders, Wide borders, Temple borders, Contrast borders, Tone-on-tone borders.\\n\\nDo not use the same design structure repeatedly. Create clear variety while keeping every saree flattering to the uploaded lady.\\n\\nThe visual fabric must remain consistent with its actual fabric type. For example: Cotton must look like real cotton. Linen must show realistic linen texture. Silk must show believable silk sheen. Chiffon must drape lightly and naturally. Organza must have a structured, airy appearance. Kanchipuram-inspired silk must have a rich woven appearance and an appropriate border structure. Do not mix fabric characteristics incorrectly.\\n\\nSTEP 5 — BLOUSE STYLE MUST MATCH THE SAREE\\n\\nFor every saree, select a blouse that genuinely matches the saree style and complements the uploaded lady. Where suitable, vary: Matching blouse, Contrast blouse, Elbow-sleeve blouse, Short-sleeve blouse, Full-sleeve blouse, Sleeveless blouse (only if appropriate), High-neck blouse, V-neck blouse, Boat-neck blouse, Square-neck blouse, Traditional blouse.\\n\\nThe blouse must: Match the saree category, Match the fabric and design language, Complement the saree colour, Suit the lady\'s visible proportions, Fit naturally on the original body. Do not generate a blouse style that visually conflicts with the saree.\\n\\nSTEP 6 — AUTHENTIC SAREE DRAPING\\n\\nEvery saree must be realistically and naturally draped around the EXACT ORIGINAL BODY.\\n\\nMaintain: Natural waist placement, Realistic pleats, Correct fabric gathering, Natural pallu placement, Logical shoulder draping, Correct fall of fabric, Natural folds, Accurate fabric weight, Correct interaction with the arms and body, Consistency with the original pose.\\n\\nThe saree must never: Float, Clip through the body, Ignore the original pose, Have impossible pleats, Have disconnected pallu sections, Look like fabric pasted onto the body.\\n\\nEvery saree must look professionally and naturally draped on the exact uploaded lady.\\n\\nSTEP 7 — STRICT SAREE NAME, FABRIC & COLOUR MATCHING\\n\\nThis is mandatory. THE WRITTEN LABEL MUST EXACTLY MATCH THE SAREE VISIBLE IN THAT PARTICULAR GRID CELL.\\n\\nFor every saree: 1) Select the exact saree type. 2) Generate that specific fabric and design accurately. 3) Inspect what is actually visible. 4) Assign the name according to the visible saree.\\n\\nUse this exact format: [SAREE TYPE] — [DOMINANT COLOUR] — [KEY DESIGN DETAIL]\\n\\nExamples: Soft Silk Saree — Deep Teal — Antique Gold Border. Chiffon Saree — Wine — Minimal Floral Print. Linen Saree — Sage Green — Contrast Border. Organza Saree — Lavender — Delicate Floral Embroidery. Cotton Saree — Mustard — Temple Border. Banarasi Silk Saree — Maroon — Gold Woven Motifs.\\n\\nBefore displaying each label, verify: Does the visible fabric resemble the named saree type? Does the visible colour match the colour name? Does the border or design match the description? If not, correct the image or use a broader but accurate label. Never label a generic silk saree as a specific regional silk style unless its visible construction genuinely supports that description.\\n\\nSTEP 8 — FIXED 4 × 4 SAREE CONSULTATION GRID — ABSOLUTELY CRITICAL\\n\\nThe final output must be ONE SINGLE IMAGE containing EXACTLY 16 saree variations arranged in a FIXED 4 × 4 GRID.\\n\\nGRID STRUCTURE — NON-NEGOTIABLE: Exactly 4 columns, Exactly 4 rows, Exactly 16 equal-sized cells, One saree variation in each cell, No missing cells, No empty cells, No duplicate cells, No additional images outside the grid.\\n\\nDO NOT create a dynamic grid. DO NOT create 3 × 4, 3 × 5, 4 × 5, 4 × 6, 5 × 5, or any other layout. THE OUTPUT MUST ALWAYS BE EXACTLY 4 × 4.\\n\\nEach of the 16 cells must show: THE EXACT SAME LADY FROM THE UPLOADED IMAGE WEARING ONE DIFFERENT, GENUINELY SUITABLE SAREE.\\n\\nMaintain exactly the same: Facial identity, Face shape, Skin tone and texture, Apparent age, Body structure, Body proportions, Pose, Posture, Head position, Hairstyle, Hair colour, Jewelry and accessories where preserved, Camera angle, Camera distance, Image framing, Crop, Background, Lighting, Shadows, Exposure, Colour grading, Overall photographic style.\\n\\nOnly change: Saree, Saree fabric, Saree colour, Saree border, Saree print or design, Saree pallu styling, Matching blouse where necessary.\\n\\nUse: Equal-sized portrait frames, Identical composition in every cell, Perfect horizontal and vertical alignment, Equal spacing, Clean white dividers, Uniform margins, Consistent image scale, Premium luxury saree consultation aesthetic.\\n\\nThe final image must clearly appear as one perfectly aligned 4 × 4 fashion consultation grid.\\n\\nOUTPUT LABELING\\n\\nPlace a small, elegant, clean, readable label below each saree image inside its corresponding grid cell. Use only this verified format: SAREE TYPE — COLOUR — DESIGN DETAIL.\\n\\nExamples: Chiffon Saree — Burgundy — Soft Floral Print. Soft Silk Saree — Emerald Green — Gold Border. Linen Saree — Dusty Rose — Minimal Contrast Border. Organza Saree — Lavender — Floral Embroidery.\\n\\nThe label must describe the saree directly above it. Do not use decorative, exaggerated, or incorrect fashion terminology.\\n\\nFINAL QUALITY CONTROL — MANDATORY\\n\\nBefore finalizing all 16 saree variations, verify:\\n\\nPERSON CHECK: Is this the exact same uploaded lady in all 16 cells? Is the facial identity unchanged? Is the face shape unchanged? Is the skin tone and texture unchanged? Is the apparent age unchanged? Is the facial expression unchanged? Is the hairstyle unchanged? Is the hair colour unchanged?\\n\\nBODY CHECK: Is the exact original body shape preserved? Is the original body size preserved? Are all visible proportions preserved? Has the body been slimmed, enlarged, lengthened, or reshaped? Does every saree naturally adapt to the existing body?\\n\\nIMAGE CHECK: Is the original pose preserved? Is the posture preserved? Is the head position preserved? Is the camera angle consistent? Is the camera distance consistent? Is the framing and crop consistent? Is the background identical? Is the lighting identical? Are shadows and photographic style consistent?\\n\\nSAREE CHECK: Is every saree type visually recognizable? Does every fabric look correct? Does every colour complement the uploaded lady? Does the visible colour match the label? Does every border match its description? Does every design match its description? Does the blouse genuinely suit the saree? Is every saree realistically draped? Is each saree clearly different from the other 15 recommendations?\\n\\nLABEL CHECK: Does the name exactly describe the visible saree? Is the saree type accurately identified? Is the colour accurately named? Is the design detail accurate?\\n\\nGRID CHECK — FINAL AND NON-NEGOTIABLE: Exactly 4 columns? Exactly 4 rows? Exactly 16 saree variations? Exactly one lady in each cell? Equal cell sizes? Perfect alignment? No missing cells? No duplicate cells? No additional images outside the grid?\\n\\nIf any answer is NO, correct the result before finalizing.\\n\\nFINAL PRIORITY ORDER\\n\\nPriority 1: Preserve the exact same uploaded lady.\\nPriority 2: Preserve the exact original face, body shape, body size, proportions, pose, posture, hairstyle, and image composition.\\nPriority 3: Intelligently select exactly 16 saree styles that genuinely suit her.\\nPriority 4: Select colours that genuinely complement her visible complexion, undertone, hair colour, and overall appearance.\\nPriority 5: Generate realistic and authentic saree fabrics, borders, prints, designs, blouses, pleats, and draping.\\nPriority 6: Ensure every saree name, fabric type, colour, and design description exactly matches the visible saree.\\nPriority 7: Ensure all 16 sarees are visually distinct and genuinely suitable.\\nPriority 8: The final output must be EXACTLY ONE PERFECTLY ALIGNED 4 × 4 GRID WITH EXACTLY 16 CELLS ONLY.\\n\\nSTRICT FINAL RULE\\n\\nDo not change the lady to make a saree look good. Select the saree styles, colours, fabrics, borders, prints, designs, draping, and blouse combinations that make the exact uploaded lady look her best.\\n\\nThe same face, identity, body shape, body proportions, pose, posture, hairstyle, hair colour, camera angle, framing, crop, background, and lighting must remain consistent in all 16 cells.\\n\\nONLY THE SAREE AND ITS MATCHING BLOUSE SHOULD CHANGE.\\n\\nFINAL OUTPUT\\n\\nONE PREMIUM, ULTRA-REALISTIC, PERSONALIZED SAREE STYLE AND COLOUR CONSULTATION IMAGE ARRANGED IN AN EXACT FIXED 4 × 4 GRID WITH EXACTLY 16 CELLS.\\n\\nEach cell must show the EXACT SAME UPLOADED LADY wearing a different, genuinely suitable, visually distinct saree, with realistic fabric, authentic draping, accurate blouse styling, flattering colours, exact body preservation, and a correctly matched label inside each corresponding grid cell.\\n\\nABSOLUTELY NO OTHER GRID SIZE. ONLY 4 × 4. EXACTLY 16 SAREE LOOKS.", "chudidar": "AI PERSONALIZED CHUDIDAR & SALWAR SUIT STYLE CONSULTATION — FIXED 4 × 4 GRID\\n\\nUse the uploaded image as the STRICT LOCKED MASTER REFERENCE IMAGE.\\n\\nYour task is to carefully analyze the uploaded lady and intelligently determine 16 distinct Chudidar, Salwar Suit, Kurta Set, and related Indian ethnic outfit styles that genuinely suit her.\\n\\nThen generate ONE SINGLE PROFESSIONAL CONSULTATION IMAGE containing the EXACT SAME LADY from the uploaded image in all 16 variations, wearing a different recommended ethnic outfit in each cell.\\n\\nABSOLUTE MASTER PERSON LOCK — CRITICAL\\n\\nTreat the uploaded image as a locked master photograph. The generated person must remain the EXACT SAME LADY from the uploaded image in every one of the 16 cells. Do not regenerate, redesign, beautify, reinterpret, or replace her.\\n\\nStrictly preserve: Exact facial identity, Exact face shape, Exact facial proportions, Exact forehead, Exact eyes, Exact eyebrows, Exact nose, Exact lips, Exact jawline, Exact cheeks, Exact ears, Exact skin tone, Exact skin texture, Exact apparent age, Exact facial expression, Existing hairstyle, Existing hair colour.\\n\\nDo not: Change the face, Beautify excessively, Change skin tone, Change ethnicity, Make her younger or older, Change facial proportions, Replace her with a different model.\\n\\nThe uploaded lady must remain immediately recognizable and identical in all 16 variations.\\n\\nSTRICT BODY STRUCTURE LOCK — NON-NEGOTIABLE\\n\\nMaintain the original lady\'s body exactly as it appears in the uploaded image.\\n\\nStrictly preserve: Exact body shape, Exact body size, Exact body proportions, Exact shoulder width and shape, Exact bust proportions, Exact waist shape and proportions, Exact hip proportions, Exact torso length, Exact neck length and thickness, Exact arm thickness and length, Exact leg proportions where visible, Exact head-to-body proportion, Exact posture, Exact pose, Exact body orientation.\\n\\nDO NOT: Make her slimmer or thinner, Make her taller or shorter, Make her curvier, Make her more muscular, Make her look like a fashion model, Alter her waist, hips, shoulders, arms, or legs, Reshape her body to make an outfit look better.\\n\\nCRITICAL RULE: THE OUTFIT MUST FIT THE ORIGINAL BODY. THE ORIGINAL BODY MUST NEVER CHANGE TO FIT THE OUTFIT.\\n\\nThe garment must naturally adapt to the exact body visible in the uploaded image.\\n\\nORIGINAL IMAGE COMPOSITION LOCK\\n\\nPreserve exactly: Same head position, Same body position, Same pose, Same posture, Same body orientation, Same arm position, Same hand position where visible, Same leg position where visible, Same camera angle, Same camera distance, Same image framing, Same crop, Same visible body area, Same background, Same lighting, Same shadows, Same exposure, Same colour grading, Same photographic style.\\n\\nDo not: Zoom in or out, Change the crop, Change the pose, Reposition the arms, Move the hands, Change body orientation, Change camera perspective.\\n\\nSTEP 1 — INTELLIGENT PERSONAL STYLE ANALYSIS\\n\\nCarefully analyze the uploaded lady\'s visible characteristics: Overall body proportions, Body silhouette, Shoulder proportions, Neck proportions, Torso proportions, Facial shape, Facial proportions, Visible skin tone and undertone, Existing hairstyle and hair colour, Overall visual balance, Apparent age, General personal style impression.\\n\\nBased on this analysis, intelligently determine which: Chudidar silhouettes suit her, Kurta lengths suit her proportions, Kurta cuts create the best visual balance, Necklines suit her face and neck, Sleeve styles suit her, Bottom styles suit her, Dupatta styles suit her, Fabrics suit her, Colours complement her complexion, Patterns and embroidery suit her, Styles suit casual, office, festive, wedding, and premium occasions.\\n\\nDo not make random fashion choices. Every recommendation must be a deliberate styling decision based on the uploaded lady\'s visible appearance.\\n\\nSTEP 2 — SELECT EXACTLY 16 DISTINCT SUITABLE OUTFIT STYLES\\n\\nSelect EXACTLY 16 major, visually distinct, genuinely suitable Chudidar, Salwar Suit, Kurta Set, and related Indian ethnic outfit styles.\\n\\nThe 16 recommendations should provide strong visual variety while remaining genuinely flattering to the uploaded lady.\\n\\nConsider suitable variations from:\\n\\nCLASSIC CHUDIDAR SUITS: Straight-cut kurta with Chudidar, Long straight kurta with Chudidar, Knee-length kurta with Chudidar, Calf-length kurta with Chudidar, Side-slit kurta with Chudidar, Minimalist classic Chudidar set.\\n\\nA-LINE KURTA SETS: A-line kurta with Chudidar, Soft flared A-line kurta, Structured A-line ethnic suit, Panelled A-line kurta, Layered A-line kurta set.\\n\\nANARKALI-INSPIRED SUITS: Light Anarkali suit, Semi-flared Anarkali, Panelled Anarkali, Festive Anarkali suit.\\n\\nSTRAIGHT-CUT ETHNIC SUITS: Tailored straight kurta set, Minimal straight-cut suit, Modern side-slit straight kurta, Structured formal ethnic suit.\\n\\nCONTEMPORARY STYLES: Asymmetrical kurta with Chudidar, Angrakha-style kurta, Layered kurta set, Contemporary high-low kurta, Indo-Western ethnic suit, Jacket-style kurta set.\\n\\nBOTTOM VARIATIONS (where genuinely suitable): Traditional Chudidar, Slim Chudidar, Straight pants, Cigarette pants, Narrow ankle pants.\\n\\nThe visible garment must exactly match its label. Do not select 16 near-duplicate outfits. Each of the 16 cells must have a clearly different silhouette, styling approach, colour treatment, fabric, neckline, sleeve detail, bottom style, or occasion styling.\\n\\nSTEP 3 — INTELLIGENT COLOUR SELECTION\\n\\nCarefully analyze the uploaded lady\'s visible complexion and overall contrast. Select colours that genuinely complement her.\\n\\nCreate meaningful variety across the 16 outfits using suitable colour families such as: Emerald green, Deep teal, Royal blue, Peacock blue, Navy blue, Burgundy, Wine, Maroon, Plum, Forest green, Mustard, Saffron, Rust, Terracotta, Coral, Warm peach, Rose, Copper, Dusty rose, Blush pink, Mauve, Lavender, Sage green, Mint, Powder blue, Soft peach, Ivory, Cream, Beige, Taupe, Champagne, Soft grey, Charcoal, Black.\\n\\nDo not assign colours randomly. Choose colours based on: Visible skin tone, Visible undertone, Hair colour, Facial contrast, Occasion, Fabric, Overall elegance.\\n\\nSTEP 4 — FABRIC SELECTION\\n\\nSelect fabrics that suit the chosen outfit style and occasion. Possible fabrics include: Cotton, Mul cotton, Linen, Chanderi, Rayon, Viscose, Crepe, Georgette, Chiffon, Silk blend, Soft silk, Raw silk, Velvet (only where suitable).\\n\\nThe visual fabric must realistically match the selected fabric. Ensure: Cotton looks breathable and naturally textured, Chanderi looks lightweight and elegant, Georgette has realistic fluid drape, Chiffon looks light and flowing, Silk has believable texture and sheen, Velvet has realistic depth and pile. Do not make every outfit appear to use the same fabric.\\n\\nSTEP 5 — NECKLINES, SLEEVES AND DUPATTA STYLING\\n\\nSelect necklines that genuinely complement the uploaded lady. Where suitable, use:\\n\\nNecklines: Round neck, V-neck, Soft V-neck, Boat neck, Square neck, U-neck, Keyhole neck, Mandarin collar, Collar neck.\\n\\nSleeve Styles: Cap sleeves, Short sleeves, Elbow sleeves, Three-quarter sleeves, Full sleeves, Bell sleeves, Straight sleeves.\\n\\nDupatta Styles (where appropriate): Matching dupatta, Contrast dupatta, Light chiffon dupatta, Organza dupatta, Printed dupatta, Embroidered dupatta, Minimal dupatta, Festive embellished dupatta.\\n\\nThe dupatta must drape naturally according to the original pose. Maintain realistic shoulder placement, fabric fall, folds, and interaction with the body and arms. Never create floating or disconnected dupattas.\\n\\nSTEP 6 — EMBROIDERY, PRINT AND DESIGN VARIETY\\n\\nIntelligently vary the design treatment across the 16 outfits. Possible treatments include: Solid colour, Minimal embroidery, Subtle threadwork, Small motifs, Medium motifs, Floral print, Geometric print, Block print, Tone-on-tone embroidery, Mirror work where suitable, Zari work for festive styles, Elegant neckline embroidery, Sleeve detailing, Hem detailing.\\n\\nDo not overload every outfit with heavy decoration. Balance the design according to: The lady\'s visible proportions, The outfit silhouette, The occasion, The fabric, Overall visual harmony.\\n\\nSTEP 7 — EXACT OUTFIT-TO-NAME MATCHING\\n\\nThis is mandatory. THE WRITTEN NAME MUST EXACTLY MATCH THE VISIBLE OUTFIT.\\n\\nFor every one of the 16 outfits: 1) Select the exact outfit structure. 2) Generate that structure clearly. 3) Inspect the visible kurta, bottom, fabric, colour, and dupatta. 4) Assign the name according to what is actually visible.\\n\\nUse this format: [Kurta / Suit Type] — [Bottom Type] — [Dominant Colour] — [Key Detail]\\n\\nExamples: Straight-Cut Kurta — Classic Chudidar — Emerald Green — Minimal Gold Neckline. A-Line Kurta — Slim Chudidar — Royal Blue — Subtle Floral Embroidery. Angrakha Kurta — Traditional Chudidar — Wine — Side Tie Detail. Long Side-Slit Kurta — Cigarette Pants — Deep Teal — Contemporary Minimalist. Semi-Flared Anarkali — Chudidar — Maroon — Gold Motif Work.\\n\\nBefore finalizing each label, verify: Does the visible kurta match the stated kurta type? Does the visible bottom match the stated bottom type? Does the colour name match the actual garment colour? Does the design detail match what is visible? If not, correct the image or correct the label.\\n\\nSTEP 8 — STRICT REALISTIC CLOTHING FIT\\n\\nEvery outfit must: Fit naturally around the original body, Respect the exact original body shape, Respect the original shoulders, Respect the original waist and hips, Respect the original arm proportions, Follow the original posture, Follow the original pose, Have realistic stitching and seams, Have believable fabric folds, Show realistic draping, Have accurate garment construction.\\n\\nDo not: Distort the body, Slim the waist, Enlarge or reduce body parts, Stretch limbs, Create floating fabric, Paste clothing unnaturally over the body, Change the body to fit the outfit.\\n\\nSTEP 9 — FIXED 4 × 4 CONSULTATION GRID — ABSOLUTELY CRITICAL\\n\\nThe final output must be ONE SINGLE IMAGE containing EXACTLY 16 outfit variations arranged in a FIXED 4 × 4 GRID.\\n\\nGRID STRUCTURE: Exactly 4 columns, Exactly 4 rows, Exactly 16 equal cells, One outfit variation per cell, No missing cells, No empty cells, No extra cells, No additional outfit images outside the grid.\\n\\nDO NOT use any other grid layout. DO NOT generate 3 × 4, 4 × 5, 5 × 5, or any dynamic grid. THE OUTPUT MUST ALWAYS BE EXACTLY 4 × 4.\\n\\nEach grid cell must show: THE EXACT SAME UPLOADED LADY WITH THE EXACT SAME FACE, IDENTITY, BODY STRUCTURE, PROPORTIONS, POSE, POSTURE, CAMERA ANGLE, FRAMING, BACKGROUND, LIGHTING, HAIRSTYLE, AND HAIR COLOUR — WITH ONLY THE CLOTHING CHANGED.\\n\\nUse: Equal-sized portrait frames, Identical composition in every cell, Perfect horizontal and vertical alignment, Equal spacing, Clean white dividers, Uniform margins, Consistent image scale, Premium fashion consultation aesthetic.\\n\\nThe 16 cells must be clearly readable as one perfectly aligned 4 × 4 consultation grid.\\n\\nFINAL QUALITY CONTROL — MANDATORY\\n\\nBefore finalizing all 16 cells, verify:\\n\\nIDENTITY CHECK: Is this exactly the same uploaded lady in every cell? Is the face unchanged? Is the skin tone unchanged? Is the apparent age unchanged? Is the hairstyle unchanged? Is the hair colour unchanged?\\n\\nBODY CHECK: Is the original body shape preserved? Is the body size unchanged? Are all visible proportions unchanged? Has the body been slimmed, enlarged, lengthened, or reshaped?\\n\\nPOSE CHECK: Is the original pose unchanged? Is the posture unchanged? Are the arms and hands maintained where visible? Is the body orientation unchanged?\\n\\nIMAGE CHECK: Is the camera angle unchanged? Is the camera distance unchanged? Is the framing unchanged? Is the crop unchanged? Is the background unchanged? Is the lighting unchanged? Is the photographic style unchanged?\\n\\nOUTFIT CHECK: Does the outfit genuinely suit the uploaded lady? Is the kurta silhouette clearly identifiable? Is the bottom type correctly represented? Does the fabric look realistic? Does the colour complement the lady? Is the dupatta naturally draped? Is the outfit clearly distinct from the other 15 outfits?\\n\\nLABEL CHECK: Does the outfit name exactly match the visible outfit? Does the bottom name match what is visible? Does the colour name match the actual colour? Does the design description match the visible garment?\\n\\nGRID CHECK — FINAL AND NON-NEGOTIABLE: Exactly 4 columns? Exactly 4 rows? Exactly 16 outfit variations? Exactly one lady per cell? Equal cell sizes? Perfect alignment? No missing cells? No duplicate cells? No extra images outside the grid?\\n\\nIf any answer is NO, correct the result before finalizing.\\n\\nFINAL PRIORITY ORDER\\n\\nPriority 1: Preserve the exact same uploaded lady.\\nPriority 2: Preserve her exact face, identity, body shape, body size, proportions, posture, and pose.\\nPriority 3: Preserve her existing hairstyle, hair colour, camera angle, framing, background, lighting, and photographic style.\\nPriority 4: Intelligently select exactly 16 distinct Chudidar, Salwar Suit, Kurta Set, and Indian ethnic outfit styles that genuinely suit her.\\nPriority 5: Select flattering colours, fabrics, necklines, sleeves, bottom styles, dupattas, and design details.\\nPriority 6: Ensure every outfit is realistically constructed and naturally fitted to the original body.\\nPriority 7: Ensure every written outfit name exactly matches the visible outfit.\\nPriority 8: The final output must be EXACTLY ONE PERFECTLY ALIGNED 4 × 4 GRID WITH 16 CELLS ONLY.\\n\\nSTRICT FINAL RULE\\n\\nDo not change the lady to fit the outfit. Select the clothing that best suits the exact lady in the uploaded image.\\n\\nThe same face, identity, body shape, body proportions, pose, posture, hairstyle, hair colour, camera angle, framing, background, and lighting must remain consistent in all 16 cells.\\n\\nONLY THE CLOTHING SHOULD CHANGE.\\n\\nFINAL OUTPUT\\n\\nONE PREMIUM, ULTRA-REALISTIC PERSONALIZED CHUDIDAR AND SALWAR SUIT STYLE CONSULTATION IMAGE, ARRANGED IN AN EXACT 4 × 4 GRID WITH EXACTLY 16 CELLS.\\n\\nEach cell must show the EXACT SAME UPLOADED LADY wearing a different, genuinely suitable, visually distinct Indian ethnic outfit, with realistic fabrics, accurate garment construction, flattering colours, exact body preservation, and a correctly matched outfit label below each cell.\\n\\nABSOLUTELY NO OTHER GRID SIZE. ONLY 4 × 4. EXACTLY 16 OUTFITS."}');
+
+// ── Module configuration ─────────────────────────────────────
+const MODULES = [
+  {
+    id: 'hairstyle',
+    label: 'Hairstyle',
+    emoji: '💇‍♀️',
+    photoHint: 'Clear front-facing face portrait · JPG / PNG / WebP · Max 10MB',
+    resultLabel: 'Your Barbie AI Hairstyle Grid',
+    loadingLabel: 'Generating your 16-hairstyle grid. This takes 20–60 seconds…',
+    successLabel: '✓ 16-hairstyle grid generated! Download or share below.',
+    emptyTitle: 'Your AI Hairstyle Grid',
+    emptyDesc: 'Upload a clear front-facing photo and generate a 16-style hairstyle consultation grid.',
+  },
+  {
+    id: 'haircolour',
+    label: 'Hair Colour',
+    emoji: '🎨',
+    photoHint: 'Clear front-facing face portrait · JPG / PNG / WebP · Max 10MB',
+    resultLabel: 'Your Barbie AI Hair Colour Grid',
+    loadingLabel: 'Generating your 16-shade colour grid. This takes 20–60 seconds…',
+    successLabel: '✓ 16-colour grid generated! Download or share below.',
+    emptyTitle: 'Your AI Hair Colour Grid',
+    emptyDesc: 'Upload a clear front-facing photo and generate a 16-shade hair colour consultation grid.',
+  },
+  {
+    id: 'saree',
+    label: 'Saree',
+    emoji: '🥻',
+    photoHint: 'Clear full-body photo, standing pose · JPG / PNG / WebP · Max 10MB',
+    resultLabel: 'Your Barbie AI Saree Style Grid',
+    loadingLabel: 'Generating your 16-saree style grid. This takes 20–60 seconds…',
+    successLabel: '✓ 16-saree grid generated! Download or share below.',
+    emptyTitle: 'Your AI Saree Style Grid',
+    emptyDesc: 'Upload a clear full-body photo and generate a 16-saree style & colour consultation grid.',
+  },
+  {
+    id: 'chudidar',
+    label: 'Chudidar',
+    emoji: '👗',
+    photoHint: 'Clear full-body photo, standing pose · JPG / PNG / WebP · Max 10MB',
+    resultLabel: 'Your Barbie AI Chudidar Style Grid',
+    loadingLabel: 'Generating your 16-outfit grid. This takes 20–60 seconds…',
+    successLabel: '✓ 16-outfit grid generated! Download or share below.',
+    emptyTitle: 'Your AI Chudidar & Suit Style Grid',
+    emptyDesc: 'Upload a clear full-body photo and generate a 16-look Chudidar & Salwar Suit consultation grid.',
+  },
+];
+
+// Per-module runtime state
+const state = {};
+MODULES.forEach(m => state[m.id] = {
+  imageBase64: null, imageMime: null, lastDataUrl: null, stream: null, facingMode: 'user'
+});
+
+const _geminiCalls = { hairstyle: 0, haircolour: 0, saree: 0, chudidar: 0 };
+
+// ── SVG icon snippets ──
+const ICON_UPLOAD = '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
+const ICON_CAMERA = '<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+const ICON_DOWNLOAD = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+const ICON_SHARE = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>';
+
+// ── Render each module panel into #modulesRoot ────────────────
+const root = document.getElementById('modulesRoot');
+MODULES.forEach(m => {
+  const panel = document.createElement('div');
+  panel.className = 'panel';
+  panel.id = 'panel-' + m.id;
+  panel.innerHTML = `
+    <div class="module-grid">
+      <aside>
+        <div>
+          <div class="aside-title">${m.emoji} ${m.label}</div>
+          <div class="aside-sub">${m.photoHint}</div>
+        </div>
+
+        <div class="img-tabs">
+          <div class="img-tab active" id="${m.id}-tab-upload" onclick="switchImgTab('${m.id}','upload')">Upload Photo</div>
+          <div class="img-tab" id="${m.id}-tab-camera" onclick="switchImgTab('${m.id}','camera')">Use Camera</div>
+        </div>
+
+        <div id="${m.id}-uploadPanel">
+          <div class="upload-zone" onclick="document.getElementById('${m.id}-fileInput').click()">
+            ${ICON_UPLOAD}
+            <h4>Drop or click to upload</h4>
+            <p>${m.photoHint}</p>
+          </div>
+          <input type="file" id="${m.id}-fileInput" accept="image/*" style="display:none" onchange="handleFile('${m.id}', event)"/>
+        </div>
+
+        <div id="${m.id}-cameraPanel" style="display:none;">
+          <div class="camera-box">
+            <video id="${m.id}-cameraFeed" autoplay playsinline></video>
+            <img id="${m.id}-snapPreview" alt="snapshot preview"/>
+            <div class="camera-placeholder" id="${m.id}-cameraPlaceholder">
+              ${ICON_CAMERA}
+              <button class="cam-btn" onclick="startCamera('${m.id}')">Enable Camera</button>
+            </div>
+            <div class="camera-controls" id="${m.id}-cameraControls">
+              <button class="cam-flip" onclick="flipCamera('${m.id}')">⟲</button>
+              <button class="cam-round" onclick="snapPhoto('${m.id}')"></button>
+            </div>
+          </div>
+          <div class="cam-err" id="${m.id}-cameraError"></div>
+        </div>
+
+        <div id="${m.id}-previewSection" style="display:none;"></div>
+
+        <div class="prompt-accordion" id="${m.id}-promptAccordion">
+          <div class="prompt-summary" onclick="togglePrompt('${m.id}')">▸ View AI consultation prompt</div>
+          <div class="prompt-text" id="${m.id}-promptText"></div>
+        </div>
+
+        <button class="gen-btn" id="${m.id}-genBtn" onclick="generate('${m.id}')" disabled>
+          <span id="${m.id}-genBtnLabel">Generate My ${m.label} Grid</span>
+        </button>
+      </aside>
+
+      <main class="output">
+        <div class="empty-state" id="${m.id}-emptyState">
+          <div class="empty-grid">
+            <div class="eg-cell"></div><div class="eg-cell"></div><div class="eg-cell"></div><div class="eg-cell"></div>
+            <div class="eg-cell"></div><div class="eg-cell"></div><div class="eg-cell"></div><div class="eg-cell"></div>
+            <div class="eg-cell"></div><div class="eg-cell"></div><div class="eg-cell"></div><div class="eg-cell"></div>
+            <div class="eg-cell"></div><div class="eg-cell"></div><div class="eg-cell"></div><div class="eg-cell"></div>
+          </div>
+          <h3>${m.emptyTitle}</h3>
+          <p>${m.emptyDesc}</p>
+        </div>
+        <div id="${m.id}-statusArea" style="display:none; width:100%; max-width:560px;"></div>
+        <div id="${m.id}-resultArea" style="display:none;"></div>
+      </main>
+    </div>
+  `;
+  root.appendChild(panel);
+});
+
+// Reports panel
+const reportsPanel = document.createElement('div');
+reportsPanel.className = 'panel';
+reportsPanel.id = 'panel-reports';
+reportsPanel.innerHTML = `
+  <div class="reports-wrap">
+    <h2>My Saved Looks</h2>
+    <div id="reportsList"><p style="color:var(--gray-dk); font-size:13px;">Loading…</p></div>
+  </div>
+`;
+root.appendChild(reportsPanel);
+
+document.getElementById('panel-hairstyle').classList.add('active');
+
+// ── Module tab switching ──
+const ALL_MODULE_IDS = MODULES.map(m => m.id).concat(['reports']);
+function switchModule(id) {
+  ALL_MODULE_IDS.forEach(mid => {
+    const tabEl = document.getElementById('tab-' + mid);
+    if (tabEl) tabEl.classList.toggle('active', mid === id);
+    document.getElementById('panel-' + mid).classList.toggle('active', mid === id);
+  });
+  if (id === 'reports') loadMyReports();
+}
+
+// ── Image tab (upload vs camera) switching ──
+function switchImgTab(moduleId, tab) {
+  const isCamera = tab === 'camera';
+  document.getElementById(moduleId + '-tab-camera').className = 'img-tab' + (isCamera ? ' active' : '');
+  document.getElementById(moduleId + '-tab-upload').className = 'img-tab' + (!isCamera ? ' active' : '');
+  document.getElementById(moduleId + '-cameraPanel').style.display = isCamera ? 'block' : 'none';
+  document.getElementById(moduleId + '-uploadPanel').style.display = isCamera ? 'none' : 'block';
+  if (!isCamera) stopCamera(moduleId);
+}
+
+// ── Camera handling ──
+async function startCamera(moduleId) {
+  const s = state[moduleId];
+  const errEl = document.getElementById(moduleId + '-cameraError');
+  errEl.style.display = 'none';
+  try {
+    s.stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: s.facingMode, width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false
+    });
+    const video = document.getElementById(moduleId + '-cameraFeed');
+    video.srcObject = s.stream;
+    video.style.display = 'block';
+    document.getElementById(moduleId + '-cameraPlaceholder').style.display = 'none';
+    document.getElementById(moduleId + '-cameraControls').style.display = 'flex';
+  } catch (err) {
+    errEl.style.display = 'block';
+    errEl.textContent = err.name === 'NotAllowedError'
+      ? '⚠ Camera access denied. Please allow camera permission and try again.'
+      : '⚠ Could not access camera: ' + err.message;
+  }
+}
+
+function stopCamera(moduleId) {
+  const s = state[moduleId];
+  if (s.stream) { s.stream.getTracks().forEach(t => t.stop()); s.stream = null; }
+  const video = document.getElementById(moduleId + '-cameraFeed');
+  video.srcObject = null;
+  video.style.display = 'none';
+  document.getElementById(moduleId + '-cameraPlaceholder').style.display = 'flex';
+  document.getElementById(moduleId + '-cameraControls').style.display = 'none';
+}
+
+async function flipCamera(moduleId) {
+  const s = state[moduleId];
+  s.facingMode = s.facingMode === 'user' ? 'environment' : 'user';
+  stopCamera(moduleId); await startCamera(moduleId);
+}
+
+function snapPhoto(moduleId) {
+  const video = document.getElementById(moduleId + '-cameraFeed');
+  const canvas = document.getElementById('snapCanvas');
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+  state[moduleId].imageBase64 = dataUrl.split(',')[1];
+  state[moduleId].imageMime = 'image/jpeg';
+  stopCamera(moduleId);
+  showPreview(moduleId, dataUrl, 'Camera Snapshot');
+}
+
+// ── File upload ──
+function handleFile(moduleId, e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { alert('File too large — max 10MB.'); return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const dataUrl = ev.target.result;
+    state[moduleId].imageBase64 = dataUrl.split(',')[1];
+    state[moduleId].imageMime = file.type || 'image/jpeg';
+    showPreview(moduleId, dataUrl, file.name);
+  };
+  reader.readAsDataURL(file);
+}
+
+function showPreview(moduleId, dataUrl, name) {
+  const sec = document.getElementById(moduleId + '-previewSection');
+  sec.style.display = 'block';
+  sec.innerHTML = `<div class="preview-card">
+    <img src="${dataUrl}" alt="preview"/>
+    <div class="preview-info"><p>${name}</p><span>✓ Ready to generate</span></div>
+    <button class="rm-btn" onclick="removeImage('${moduleId}')">×</button>
+  </div>`;
+  document.getElementById(moduleId + '-promptText').textContent = PROMPTS[moduleId];
+  document.getElementById(moduleId + '-promptAccordion').style.display = 'block';
+  checkReady(moduleId);
+}
+
+function togglePrompt(moduleId) {
+  const el = document.getElementById(moduleId + '-promptText');
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+
+function removeImage(moduleId) {
+  state[moduleId].imageBase64 = null; state[moduleId].imageMime = null;
+  document.getElementById(moduleId + '-previewSection').style.display = 'none';
+  document.getElementById(moduleId + '-fileInput').value = '';
+  document.getElementById(moduleId + '-promptAccordion').style.display = 'none';
+  resetOutput(moduleId); checkReady(moduleId);
+}
+
+function checkReady(moduleId) {
+  document.getElementById(moduleId + '-genBtn').disabled = !state[moduleId].imageBase64;
+}
+
+function resetOutput(moduleId) {
+  document.getElementById(moduleId + '-emptyState').style.display = 'block';
+  document.getElementById(moduleId + '-statusArea').style.display = 'none';
+  document.getElementById(moduleId + '-resultArea').style.display = 'none';
+}
+
+function showStatus(moduleId, type, msg, spinner) {
+  document.getElementById(moduleId + '-emptyState').style.display = 'none';
+  const sa = document.getElementById(moduleId + '-statusArea');
+  sa.style.display = 'block';
+  sa.innerHTML = `<div class="status-bar ${type}">${spinner ? '<div class="spin2"></div>' : ''}<span>${msg}</span></div>`;
+}
+
+// ── Generate ──
+async function generate(moduleId) {
+  const s = state[moduleId];
+  const mod = MODULES.find(m => m.id === moduleId);
+  if (!s.imageBase64) return;
+
+  const btn = document.getElementById(moduleId + '-genBtn');
+  const label = document.getElementById(moduleId + '-genBtnLabel');
+  btn.disabled = true;
+  label.innerHTML = '<div class="spinner"></div> Generating…';
+  document.getElementById(moduleId + '-resultArea').style.display = 'none';
+  showStatus(moduleId, 'info', 'Preparing your photo…', true);
+
+  // Resize to max 1024px (full-body modules need more detail than face-only)
+  let finalBase64 = s.imageBase64;
+  let finalMime   = s.imageMime;
+  try {
+    const img = new Image();
+    await new Promise(res => { img.onload = res; img.src = `data:${s.imageMime};base64,${s.imageBase64}`; });
+    const MAX = 1024;
+    if (img.width > MAX || img.height > MAX) {
+      const scale = Math.min(MAX / img.width, MAX / img.height);
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      const dataUrl = c.toDataURL('image/jpeg', 0.9);
+      finalBase64 = dataUrl.split(',')[1]; finalMime = 'image/jpeg';
+    }
+  } catch (e) { /* use original if resize fails */ }
+
+  // Note: background is intentionally NOT removed — these prompts require
+  // preserving the original background exactly across all 16 grid cells.
+  showStatus(moduleId, 'info', mod.loadingLabel, true);
+
+  try {
+    const payload = {
+      contents: [{
+        parts: [
+          { text: PROMPTS[moduleId] },
+          { inline_data: { mime_type: finalMime, data: finalBase64 } }
+        ]
+      }],
+      generationConfig: { responseModalities: ['IMAGE', 'TEXT'], temperature: 0.4 }
+    };
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000);
+
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payload }),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error?.message || data?.error || 'Error ' + res.status);
+
+    const parts = data?.candidates?.[0]?.content?.parts || [];
+    const imgPart = parts.find(p => p.inlineData?.mimeType?.startsWith('image/'));
+
+    if (!imgPart) {
+      const txt = parts.find(p => p.text);
+      throw new Error(txt?.text?.slice(0, 220) || 'No image returned. Try a clearer photo.');
+    }
+
+    s.lastDataUrl = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
+    showStatus(moduleId, 'success', mod.successLabel, false);
+    _geminiCalls[moduleId] = (_geminiCalls[moduleId] || 0) + 1;
+
+    const ra = document.getElementById(moduleId + '-resultArea');
+    ra.style.display = 'block';
+    const outputEl = ra.closest('.output');
+    if (outputEl) outputEl.scrollTop = 0;
+    ra.innerHTML = `<div class="result-wrap">
+      <div class="result-label">${mod.resultLabel}</div>
+      <div class="result-img-box"><img src="${s.lastDataUrl}" alt="16-look consultation grid"/></div>
+      <div class="result-actions">
+        <button onclick="downloadResult('${moduleId}')">${ICON_DOWNLOAD} Download</button>
+        <button class="primary" onclick="shareResult('${moduleId}')">${ICON_SHARE} Share</button>
+      </div>
+    </div>`;
+
+    saveReport(moduleId, s.lastDataUrl).catch(() => {});
+
+  } catch (err) {
+    showStatus(moduleId, 'error', '⚠ ' + err.message, false);
+  } finally {
+    btn.disabled = false;
+    label.textContent = 'Generate My ' + mod.label + ' Grid';
+  }
+}
+
+function downloadResult(moduleId) {
+  const s = state[moduleId];
+  if (!s.lastDataUrl) return;
+  const a = document.createElement('a');
+  a.href = s.lastDataUrl;
+  a.download = `barbie-${moduleId}-grid-${Date.now()}.png`;
+  a.click();
+}
+
+async function shareResult(moduleId) {
+  const s = state[moduleId];
+  if (!s.lastDataUrl) return;
+  try {
+    const res = await fetch(s.lastDataUrl);
+    const blob = await res.blob();
+    const file = new File([blob], `barbie-${moduleId}-grid.png`, { type: blob.type });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'My Barbie AI Style Grid' });
+    } else {
+      downloadResult(moduleId);
+    }
+  } catch (e) { downloadResult(moduleId); }
+}
+
+// ── Save report to Supabase (best-effort, non-blocking) ──
+async function saveReport(moduleId, dataUrl) {
+  const sb = getSb();
+  if (!sb) return;
+  try {
+    const blob = await (await fetch(dataUrl)).blob();
+    const path = `${moduleId}/${session.id || 'anon'}-${Date.now()}.png`;
+    const { error: upErr } = await sb.storage.from(GRID_BUCKET).upload(path, blob, { contentType: 'image/png', upsert: true });
+    if (upErr) return;
+    const { data: pub } = sb.storage.from(GRID_BUCKET).getPublicUrl(path);
+    await sb.from('barbie_grid_reports').insert({
+      user_id: session.id || null,
+      user_name: session.name || null,
+      module: moduleId,
+      image_url: pub?.publicUrl || null,
+      created_at: new Date().toISOString()
+    });
+  } catch (e) { /* best-effort */ }
+}
+
+// ── My Reports ──
+async function loadMyReports() {
+  const listEl = document.getElementById('reportsList');
+  const sb = getSb();
+  if (!sb) { listEl.innerHTML = '<p style="color:var(--gray-dk); font-size:13px;">Reports unavailable.</p>'; return; }
+  try {
+    const { data, error } = await sb.from('barbie_grid_reports')
+      .select('module, image_url, created_at')
+      .eq('user_id', session.id)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (error || !data || data.length === 0) {
+      listEl.innerHTML = '<p style="color:var(--gray-dk); font-size:13px;">No saved looks yet — generate your first style grid!</p>';
+      return;
+    }
+    listEl.innerHTML = data.map(r => `
+      <div class="report-row">
+        <img src="${r.image_url}" alt="${r.module}"/>
+        <div class="r-info">
+          <div class="r-module">${r.module}</div>
+          <div class="r-date">${new Date(r.created_at).toLocaleString()}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    listEl.innerHTML = '<p style="color:var(--gray-dk); font-size:13px;">Could not load reports.</p>';
+  }
+}
+</script>
+
+</body>
+</html>

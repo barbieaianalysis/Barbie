@@ -1,0 +1,29 @@
+{
+  "name": "Barbie AI Style Consultation",
+  "short_name": "Barbie AI",
+  "description": "Barbie AI \u2014 Hairstyle, Hair Colour, Saree & Chudidar Style Consultation",
+  "id": "barbie-ai-consultation-2026",
+  "start_url": "/dashboard?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#fdf7f3",
+  "theme_color": "#b3536a",
+  "lang": "en",
+  "categories": ["beauty", "lifestyle", "fashion", "business"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "form_factor": "narrow", "label": "Barbie AI Style Consultation Dashboard" }
+  ],
+  "shortcuts": [
+    { "name": "Hairstyle", "short_name": "Hairstyle", "url": "/dashboard#hairstyle", "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Saree", "short_name": "Saree", "url": "/dashboard#saree", "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] }
+  ],
+  "prefer_related_applications": false
+}

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login — Barbie AI</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: #fdf7f3;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      padding: 1rem;
+    }
+
+    .card {
+      background: #fff; border: 1px solid #f0e2dd; border-radius: 16px;
+      padding: 2rem; width: 100%; max-width: 360px;
+      box-shadow: 0 2px 16px rgba(122,46,66,0.10);
+    }
+
+    .logo-wrap { text-align: center; margin-bottom: 1.75rem; }
+    .logo-icon {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: linear-gradient(135deg, #b3536a 0%, #7a2e42 100%);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 0.9rem; font-size: 24px;
+    }
+    .logo-wrap h1 { font-size: 18px; font-weight: 600; color: #2b2320; margin-bottom: 4px; }
+    .logo-wrap p { font-size: 13px; color: #8a7b76; }
+
+    .badge-restricted {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #faf3e6; color: #92580e;
+      font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+      margin-top: 8px; letter-spacing: 0.4px; text-transform: uppercase;
+    }
+
+    .field { margin-bottom: 1rem; }
+    label { display: block; font-size: 13px; color: #6b5c57; margin-bottom: 6px; font-weight: 500; }
+
+    .phone-row {
+      display: flex; border: 1px solid #e6d9d4; border-radius: 8px; overflow: hidden; background: #fdf7f3;
+    }
+    .phone-prefix {
+      padding: 0 10px; font-size: 13px; color: #6b5c57;
+      border-right: 1px solid #e6d9d4; display: flex; align-items: center;
+      background: #f7ece9; white-space: nowrap;
+    }
+    .phone-row input {
+      flex: 1; border: none; background: transparent; padding: 0 12px;
+      height: 40px; font-size: 15px; outline: none; color: #2b2320;
+    }
+
+    input[type="password"], input[type="tel"] {
+      height: 40px; width: 100%; border: 1px solid #e6d9d4; border-radius: 8px;
+      background: #fdf7f3; padding: 0 12px; font-size: 15px; color: #2b2320;
+      outline: none; transition: border-color 0.15s;
+    }
+    input:focus { border-color: #b3536a; background: #fff; }
+
+    .pin-row { display: flex; align-items: center; gap: 8px; }
+    .pin-row input { flex: 1; letter-spacing: 4px; }
+
+    .toggle-pin {
+      background: none; border: 1px solid #e6d9d4; border-radius: 8px;
+      width: 40px; height: 40px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #6b5c57; flex-shrink: 0; transition: background 0.15s;
+    }
+    .toggle-pin:hover { background: #f7ece9; }
+    .toggle-pin svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+    .btn-login {
+      width: 100%; height: 42px;
+      background: linear-gradient(135deg, #b3536a 0%, #7a2e42 100%);
+      color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      gap: 8px; margin-top: 1.25rem; transition: opacity 0.15s;
+    }
+    .btn-login:hover { opacity: 0.88; }
+    .btn-login:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-login svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    .msg { margin-top: 1rem; padding: 10px 14px; border-radius: 8px; font-size: 13px; display: none; align-items: flex-start; gap: 8px; }
+    .msg.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; display: flex; }
+    .msg.success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; display: flex; }
+    .msg.info { background: #fdf3f0; color: #7a2e42; border: 1px solid #f0d5cc; display: flex; }
+    .msg svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; margin-top: 1px; }
+
+    .divider { border: none; border-top: 1px solid #f0e2dd; margin: 1.25rem 0; }
+    .footer-link { text-align: center; font-size: 13px; color: #8a7b76; }
+    .footer-link a { color: #7a2e42; text-decoration: none; font-weight: 500; }
+    .footer-link a:hover { text-decoration: underline; }
+
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo-wrap">
+    <div class="logo-icon">💄</div>
+    <h1>Admin login</h1>
+    <p>Barbie AI style consultation system</p>
+    <span class="badge-restricted">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Restricted access
+    </span>
+  </div>
+
+  <div class="field">
+    <label for="phone">Phone number</label>
+    <div class="phone-row">
+      <span class="phone-prefix">🇮🇳 +91</span>
+      <input id="phone" type="tel" inputmode="numeric" placeholder="9876543210" maxlength="10" autocomplete="tel" />
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="pin">6-digit PIN</label>
+    <div class="pin-row">
+      <input id="pin" type="password" inputmode="numeric" placeholder="••••••" maxlength="6" autocomplete="current-password" />
+      <button class="toggle-pin" id="togglePin" type="button" title="Show/hide PIN" aria-label="Toggle PIN visibility">
+        <svg id="eyeIcon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <button class="btn-login" id="loginBtn" type="button">
+    <svg id="lockIcon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <div class="spinner" id="spinner"></div>
+    <span id="btnText">Sign in to admin panel</span>
+  </button>
+
+  <div class="msg" id="msg">
+    <svg id="msgIcon" viewBox="0 0 24 24"></svg>
+    <span id="msgText"></span>
+  </div>
+
+  <hr class="divider" />
+
+  <p class="footer-link">
+    Client? <a href="/">Go to client login →</a>
+  </p>
+</div>
+
+<script>
+  // ── Config — fresh Supabase project for Barbie ────────────────────────────
+  const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+  async function sha256(text) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  function showMsg(type, text) {
+    const el = document.getElementById('msg');
+    const icon = document.getElementById('msgIcon');
+    el.className = `msg ${type}`;
+    document.getElementById('msgText').textContent = text;
+    const icons = {
+      error:   '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+      success: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+      info:    '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>'
+    };
+    icon.innerHTML = icons[type] || icons.info;
+  }
+
+  function setLoading(on) {
+    const btn = document.getElementById('loginBtn');
+    const spinner = document.getElementById('spinner');
+    const lockIcon = document.getElementById('lockIcon');
+    const btnText = document.getElementById('btnText');
+    btn.disabled = on;
+    spinner.style.display = on ? 'block' : 'none';
+    lockIcon.style.display = on ? 'none' : 'block';
+    btnText.textContent = on ? 'Signing in…' : 'Sign in to admin panel';
+  }
+
+  document.getElementById('togglePin').addEventListener('click', () => {
+    const pinInput = document.getElementById('pin');
+    const isHidden = pinInput.type === 'password';
+    pinInput.type = isHidden ? 'text' : 'password';
+    document.getElementById('eyeIcon').innerHTML = isHidden
+      ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  });
+
+  document.getElementById('loginBtn').addEventListener('click', handleLogin);
+  document.getElementById('pin').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+
+  async function handleLogin() {
+    const phone = document.getElementById('phone').value.trim();
+    const pin   = document.getElementById('pin').value.trim();
+
+    if (phone.length < 10) { showMsg('error', 'Enter a valid 10-digit phone number.'); return; }
+    if (pin.length !== 6 || isNaN(pin)) { showMsg('error', 'PIN must be exactly 6 digits.'); return; }
+
+    setLoading(true);
+    document.getElementById('msg').className = 'msg';
+
+    try {
+      const pinHash = await sha256(pin);
+
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/users?phone=eq.91${phone}&select=id,name,phone,role,is_active`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+      });
+
+      if (!res.ok) throw new Error('Network error. Please try again.');
+
+      const users = await res.json();
+
+      if (!users || users.length === 0) {
+        showMsg('error', 'No account found for this phone number.');
+        setLoading(false);
+        return;
+      }
+
+      const user = users[0];
+
+      if (!user.is_active) {
+        showMsg('error', 'This account has been deactivated. Contact your administrator.');
+        setLoading(false);
+        return;
+      }
+
+      if (user.role !== 'admin') {
+        showMsg('error', 'Access denied — this portal is for admin accounts only. Clients should use the client login.');
+        setLoading(false);
+        return;
+      }
+
+      const pinRes = await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${user.id}&pin_hash=eq.${pinHash}&select=id`, {
+        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+      });
+
+      const pinMatch = await pinRes.json();
+
+      if (!pinMatch || pinMatch.length === 0) {
+        showMsg('error', 'Incorrect PIN. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      showMsg('success', `Welcome, ${user.name || 'Admin'}! Redirecting to admin panel…`);
+
+      localStorage.setItem('barbie_user', JSON.stringify({
+        id: user.id, name: user.name, phone: user.phone, role: user.role,
+      }));
+
+      setTimeout(() => { window.location.href = '/admin'; }, 1200);
+
+    } catch (err) {
+      showMsg('error', err.message || 'Something went wrong. Please try again.');
+      setLoading(false);
+    }
+  }
+
+  document.getElementById('phone').focus();
+</script>
+</body>
+</html>

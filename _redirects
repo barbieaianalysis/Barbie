@@ -1,0 +1,5 @@
+# Barbie AI — Cloudflare Pages Redirects
+# NOTE: Cloudflare Pages auto-serves .html files without extension
+# So /dashboard serves dashboard.html natively — no redirect rules needed.
+
+# Root / shows the login page (index.html is served automatically) — no rule needed.
